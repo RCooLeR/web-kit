@@ -1,0 +1,33 @@
+{
+  "name": "@rcooler/format",
+  "version": "0.1.0",
+  "description": "Dates in Kyiv time, durations, numbers and UAH, USD and EUR money.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "@rcooler/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RCooLeR/web-kit.git",
+    "directory": "packages/format"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "scripts": {
+    "build": "node ../../node_modules/@typescript/native/bin/tsc -p tsconfig.build.json",
+    "typecheck": "node ../../node_modules/@typescript/native/bin/tsc --noEmit -p tsconfig.json"
+  }
+}

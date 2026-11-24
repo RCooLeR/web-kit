@@ -1,0 +1,5 @@
+dist/
+coverage/
+package-lock.json
+# Hand-wrapped documentation; prettier would pad the tables.
+*.md

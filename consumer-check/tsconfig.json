@@ -1,0 +1,19 @@
+// Compiles consumer.ts against the built packages with TypeScript 6 and typical app settings
+// (bundler resolution). skipLibCheck is off on purpose: the declarations the
+// packages publish are what is being checked.
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "types": [],
+    "noEmit": true,
+    "strict": true,
+    "exactOptionalPropertyTypes": true,
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": false,
+    "jsx": "react-jsx"
+  },
+  "include": ["consumer.ts"]
+}

@@ -1,0 +1,249 @@
+import { describe, expect, it, vi } from "vitest";
+
+import {
+  clickTarget,
+  openClicked,
+  readPushMessage,
+  registerPushHandlers,
+  resubscribe,
+  showPushed,
+  type WindowClientLike,
+} from "./worker.js";
+
+const ORIGIN = "https://app.example.test";
+const defaults = {
+  title: "Example",
+  tag: "example",
+  icon: "/icon-192.png",
+  badge: "/badge-96.png",
+};
+
+/** Collects what handlers pass to waitUntil, so a test can wait for all of it. */
+function extendable() {
+  const work: Promise<unknown>[] = [];
+  return { waitUntil: (promise: Promise<unknown>) => void work.push(promise), work };
+}
+
+/** An open window whose focus and navigate calls are recorded and succeed. */
+function windowClient(url: string) {
+  const focus = vi.fn<() => Promise<WindowClientLike>>();
+  const navigate = vi.fn<(target: string) => Promise<WindowClientLike | null>>();
+  const client = { url, focus, navigate } satisfies WindowClientLike;
+  focus.mockResolvedValue(client);
+  navigate.mockResolvedValue(client);
+  return client;
+}
+
+function workerScope(windows: WindowClientLike[] = []) {
+  const subscribed = { toJSON: () => ({ endpoint: "https://push.example.test/new" }) };
+  const listeners = new Map<string, (event: never) => void>();
+  return {
+    listeners,
+    subscribed,
+    scope: {
+      location: { origin: ORIGIN },
+      registration: {
+        showNotification: vi.fn(() => Promise.resolve()),
+        pushManager: { subscribe: vi.fn(() => Promise.resolve(subscribed)) },
+      },
+      clients: {
+        matchAll: vi.fn(() => Promise.resolve(windows)),
+        openWindow: vi.fn(() => Promise.resolve(null)),
+      },
+      addEventListener: (type: string, listener: (event: never) => void) =>
+        void listeners.set(type, listener),
+    },
+  };
+}
+
+describe("readPushMessage", () => {
+  it("takes the server's fields", () => {
+    expect(
+      readPushMessage(
+        { title: "Build finished", body: "Server", tag: "build", url: "/log/7" },
+        defaults,
+      ),
+    ).toEqual({ title: "Build finished", body: "Server", tag: "build", url: "/log/7" });
+  });
+
+  it("falls back field by field for anything that is not a non-empty string", () => {
+    expect(readPushMessage({ title: "", body: 7, tag: null, url: {} }, defaults)).toEqual({
+      title: "Example",
+      body: "",
+      tag: "example",
+      url: "/",
+    });
+  });
+
+  it("gives the defaults for a payload that is not an object", () => {
+    const fallback = { title: "Example", body: "", tag: "example", url: "/inbox" };
+    for (const payload of [undefined, null, "text", 42]) {
+      expect(readPushMessage(payload, { ...defaults, url: "/inbox" })).toEqual(fallback);
+    }
+  });
+});
+
+describe("clickTarget", () => {
+  it("resolves a path against the app's origin", () => {
+    expect(clickTarget("/log/7?tab=all", ORIGIN)).toBe(`${ORIGIN}/log/7?tab=all`);
+    expect(clickTarget(`${ORIGIN}/log/7`, ORIGIN)).toBe(`${ORIGIN}/log/7`);
+  });
+
+  it("opens the start page instead of another site", () => {
+    expect(clickTarget("https://evil.example/login", ORIGIN)).toBe(`${ORIGIN}/`);
+    expect(clickTarget("//evil.example/login", ORIGIN)).toBe(`${ORIGIN}/`);
+    expect(clickTarget("javascript:alert(1)", ORIGIN)).toBe(`${ORIGIN}/`);
+  });
+
+  it("opens the start page for a missing or unusable address", () => {
+    expect(clickTarget(undefined, ORIGIN)).toBe(`${ORIGIN}/`);
+    expect(clickTarget(42, ORIGIN)).toBe(`${ORIGIN}/`);
+    expect(clickTarget("http://[bad", ORIGIN)).toBe(`${ORIGIN}/`);
+  });
+});
+
+describe("showPushed", () => {
+  it("shows the pushed message with the app's icons", async () => {
+    const { scope } = workerScope();
+    const event = {
+      ...extendable(),
+      data: {
+        json: () => ({ title: "Build finished", body: "Server", tag: "build", url: "/log/7" }),
+      },
+    };
+    showPushed(scope, event, defaults);
+    await Promise.all(event.work);
+
+    expect(scope.registration.showNotification).toHaveBeenCalledWith("Build finished", {
+      body: "Server",
+      tag: "build",
+      data: { url: "/log/7" },
+      icon: "/icon-192.png",
+      badge: "/badge-96.png",
+    });
+  });
+
+  it("still shows a notification for a push without data or with data that is not JSON", async () => {
+    const { scope } = workerScope();
+    const empty = { ...extendable(), data: null };
+    const broken = {
+      ...extendable(),
+      data: {
+        json: () => {
+          throw new SyntaxError("not JSON");
+        },
+      },
+    };
+    showPushed(scope, empty, { title: "Example", tag: "example" });
+    showPushed(scope, broken, { title: "Example", tag: "example" });
+    await Promise.all([...empty.work, ...broken.work]);
+
+    expect(scope.registration.showNotification).toHaveBeenCalledTimes(2);
+    expect(scope.registration.showNotification).toHaveBeenLastCalledWith("Example", {
+      body: "",
+      tag: "example",
+      data: { url: "/" },
+    });
+  });
+});
+
+describe("openClicked", () => {
+  function click(url: unknown) {
+    const close = vi.fn();
+    return { ...extendable(), notification: { close, data: { url } } };
+  }
+
+  it("opens a new window when the app is not open", async () => {
+    const { scope } = workerScope();
+    const event = click("/log/7");
+    openClicked(scope, event);
+    await Promise.all(event.work);
+
+    expect(event.notification.close).toHaveBeenCalledOnce();
+    expect(scope.clients.openWindow).toHaveBeenCalledWith(`${ORIGIN}/log/7`);
+  });
+
+  it("brings forward the window that already shows the page", async () => {
+    const other = windowClient(`${ORIGIN}/`);
+    const showing = windowClient(`${ORIGIN}/log/7`);
+    const { scope } = workerScope([other, showing]);
+    const event = click("/log/7");
+    openClicked(scope, event);
+    await Promise.all(event.work);
+
+    expect(showing.focus).toHaveBeenCalledOnce();
+    expect(showing.navigate).not.toHaveBeenCalled();
+    expect(other.focus).not.toHaveBeenCalled();
+    expect(scope.clients.openWindow).not.toHaveBeenCalled();
+  });
+
+  it("takes an open window on another page to the one asked for", async () => {
+    const open = windowClient(`${ORIGIN}/settings`);
+    const { scope } = workerScope([open]);
+    const event = click("/log/7");
+    openClicked(scope, event);
+    await Promise.all(event.work);
+
+    expect(open.focus).toHaveBeenCalledOnce();
+    expect(open.navigate).toHaveBeenCalledWith(`${ORIGIN}/log/7`);
+  });
+
+  it("never opens another site, whatever the message said", async () => {
+    const { scope } = workerScope();
+    const event = click("https://evil.example/login");
+    openClicked(scope, event);
+    await Promise.all(event.work);
+
+    expect(scope.clients.openWindow).toHaveBeenCalledWith(`${ORIGIN}/`);
+  });
+});
+
+describe("resubscribe", () => {
+  it("reports the subscription the browser already made", async () => {
+    const { scope } = workerScope();
+    const report = vi.fn(() => Promise.resolve());
+    const event = {
+      ...extendable(),
+      newSubscription: { toJSON: () => ({ endpoint: "https://push.example.test/replaced" }) },
+    };
+    resubscribe(scope, event, report);
+    await Promise.all(event.work);
+
+    expect(scope.registration.pushManager.subscribe).not.toHaveBeenCalled();
+    expect(report).toHaveBeenCalledWith({ endpoint: "https://push.example.test/replaced" });
+  });
+
+  it("subscribes again with the old options when the browser did not", async () => {
+    const { scope } = workerScope();
+    const report = vi.fn(() => Promise.resolve());
+    const options = { userVisibleOnly: true, applicationServerKey: "key" };
+    const event = { ...extendable(), newSubscription: null, oldSubscription: { options } };
+    resubscribe(scope, event, report);
+    await Promise.all(event.work);
+
+    expect(scope.registration.pushManager.subscribe).toHaveBeenCalledWith(options);
+    expect(report).toHaveBeenCalledWith({ endpoint: "https://push.example.test/new" });
+  });
+
+  it("does nothing when the browser gives neither subscription", async () => {
+    const { scope } = workerScope();
+    const report = vi.fn(() => Promise.resolve());
+    const event = extendable();
+    resubscribe(scope, event, report);
+    await Promise.all(event.work);
+
+    expect(report).not.toHaveBeenCalled();
+  });
+});
+
+describe("registerPushHandlers", () => {
+  it("listens for the three events", () => {
+    const { scope, listeners } = workerScope();
+    registerPushHandlers(scope, { defaults, onSubscriptionChange: () => Promise.resolve() });
+    expect([...listeners.keys()].sort()).toEqual([
+      "notificationclick",
+      "push",
+      "pushsubscriptionchange",
+    ]);
+  });
+});

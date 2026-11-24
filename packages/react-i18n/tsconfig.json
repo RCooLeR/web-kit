@@ -1,0 +1,6 @@
+// Type check of sources and tests; nothing is written.
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": { "noEmit": true, "jsx": "react-jsx" },
+  "include": ["src"]
+}

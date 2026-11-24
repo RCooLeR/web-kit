@@ -1,0 +1,20 @@
+# Changelog
+
+The packages follow semantic versioning and share one version. Before 1.0 a minor version may
+change interfaces; such changes are listed here.
+
+## Unreleased
+
+The packages were first developed inside [kit](https://github.com/RCooLeR/kit) and moved here before
+either repository was published. Their code is unchanged.
+
+- Licensed under MIT; package manifests point at this repository.
+- Each package exports its source under the `@rcooler/source` condition. Lint, type check and tests
+  in this workspace read siblings through it, so they no longer need a build first.
+
+### 0.1.0 (not published)
+
+- `tokens`, `format`, `i18n-core`, `http`, `webpush`.
+- `react-ui` (`Modal`, toasts, `DataTable`, `ErrorBoundary`) and `react-i18n` (provider and hook).
+- `i18n-core`: `Translator` and `http`'s `Client` declare their members as function properties, so
+  they can be destructured; `createTranslator` requires `error.unknown` in its types.

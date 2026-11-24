@@ -1,0 +1,13 @@
+# web-kit builds no image of its own, but an app's Dockerfile can read this checkout as a named
+# build context (`--build-context web-kit=../web-kit`) and build the packages there. Keep installed
+# dependencies, build output, repository metadata and local state out of what is sent to the builder.
+.git
+.github
+.idea
+.vscode
+**/node_modules
+**/dist
+**/coverage
+**/*.tsbuildinfo
+**/.env
+**/.env.*
