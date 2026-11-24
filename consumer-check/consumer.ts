@@ -50,6 +50,7 @@ export async function demo(scope: WorkerScopeLike): Promise<string[]> {
   registerPushHandlers(scope, {
     defaults: { title: "App", tag: "app" },
     onSubscriptionChange: (subscription) => backend.subscribe(subscription),
+    onAnswer: (token) => fetch("/api/answers", { method: "POST", body: JSON.stringify({ token }) }),
   });
   let answer = 0;
   try {

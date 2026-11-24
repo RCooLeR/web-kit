@@ -19,7 +19,7 @@ promise yet. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 | `@rcooler/format` | Durations, calendar dates, instants in an explicit time zone (default `Europe/Kyiv`), elapsed time, numbers, UAH, USD and EUR amounts | none |
 | `@rcooler/i18n-core` | Typed `uk` and `en` dictionaries, placeholders, plural forms, error text by code | none |
 | `@rcooler/http` | `fetch` with a timeout, `ApiError` with stable codes, answers checked by a schema (any `safeParse`, for example zod) | none |
-| `@rcooler/webpush` | Subscribe, resubscribe after a server key change, and the service worker handlers (`@rcooler/webpush/worker`) | none |
+| `@rcooler/webpush` | Subscribe, resubscribe after a server key change, and the service worker handlers (`@rcooler/webpush/worker`): show the message with its buttons, open the page, hand an answer button's token to the app | none |
 | `@rcooler/react-ui` | `Modal` with a focus trap, a toast queue, a sortable `DataTable`, `ErrorBoundary`, all Bootstrap 5 markup | React 19.3 (peer) |
 | `@rcooler/react-i18n` | `createI18n(dictionaries)`: a provider and a hook that give components the translator and a language switch | React 19.3 (peer), `@rcooler/i18n-core` |
 

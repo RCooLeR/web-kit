@@ -1,12 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
 
 import {
+  MAX_ACTIONS,
   clickTarget,
   openClicked,
   readPushMessage,
   registerPushHandlers,
   resubscribe,
   showPushed,
+  type ShowNotificationOptions,
   type WindowClientLike,
 } from "./worker.js";
 
@@ -43,7 +45,9 @@ function workerScope(windows: WindowClientLike[] = []) {
     scope: {
       location: { origin: ORIGIN },
       registration: {
-        showNotification: vi.fn(() => Promise.resolve()),
+        showNotification: vi.fn((_title: string, _options: ShowNotificationOptions) =>
+          Promise.resolve(),
+        ),
         pushManager: { subscribe: vi.fn(() => Promise.resolve(subscribed)) },
       },
       clients: {
@@ -63,7 +67,13 @@ describe("readPushMessage", () => {
         { title: "Build finished", body: "Server", tag: "build", url: "/log/7" },
         defaults,
       ),
-    ).toEqual({ title: "Build finished", body: "Server", tag: "build", url: "/log/7" });
+    ).toEqual({
+      title: "Build finished",
+      body: "Server",
+      tag: "build",
+      url: "/log/7",
+      actions: [],
+    });
   });
 
   it("falls back field by field for anything that is not a non-empty string", () => {
@@ -72,11 +82,12 @@ describe("readPushMessage", () => {
       body: "",
       tag: "example",
       url: "/",
+      actions: [],
     });
   });
 
   it("gives the defaults for a payload that is not an object", () => {
-    const fallback = { title: "Example", body: "", tag: "example", url: "/inbox" };
+    const fallback = { title: "Example", body: "", tag: "example", url: "/inbox", actions: [] };
     for (const payload of [undefined, null, "text", 42]) {
       expect(readPushMessage(payload, { ...defaults, url: "/inbox" })).toEqual(fallback);
     }
@@ -117,7 +128,7 @@ describe("showPushed", () => {
     expect(scope.registration.showNotification).toHaveBeenCalledWith("Build finished", {
       body: "Server",
       tag: "build",
-      data: { url: "/log/7" },
+      data: { url: "/log/7", actions: [] },
       icon: "/icon-192.png",
       badge: "/badge-96.png",
     });
@@ -142,7 +153,7 @@ describe("showPushed", () => {
     expect(scope.registration.showNotification).toHaveBeenLastCalledWith("Example", {
       body: "",
       tag: "example",
-      data: { url: "/" },
+      data: { url: "/", actions: [] },
     });
   });
 });
@@ -245,5 +256,106 @@ describe("registerPushHandlers", () => {
       "push",
       "pushsubscriptionchange",
     ]);
+  });
+});
+
+describe("action buttons", () => {
+  const actions = [
+    { kind: "callback", title: "Approve", action: "AAAAAAAAAAAAAAAAAAAAAA.0.BBBBBBBBBBBBBBBB" },
+    { kind: "open", title: "Open", url: "/requests/7" },
+    { kind: "reply", title: "Answer", action: "token-of-a-reply" },
+    { kind: "callback", title: "", action: "untitled" },
+    { kind: "open", title: "No page" },
+    "not an object",
+    { kind: "callback", title: "Deny", action: "CCCCCCCCCCCCCCCCCCCCCC.1.DDDDDDDDDDDDDDDD" },
+    { kind: "callback", title: "Later", action: "EEEEEEEEEEEEEEEEEEEEEE.2.FFFFFFFFFFFFFFFF" },
+  ];
+
+  it("keeps the buttons a service worker can handle, in order, at most MAX_ACTIONS", () => {
+    const message = readPushMessage({ title: "15 more minutes?", actions }, defaults);
+    expect(message.actions).toEqual([
+      {
+        kind: "answer",
+        title: "Approve",
+        token: "AAAAAAAAAAAAAAAAAAAAAA.0.BBBBBBBBBBBBBBBB",
+        url: "",
+      },
+      { kind: "open", title: "Open", token: "", url: "/requests/7" },
+      {
+        kind: "answer",
+        title: "Deny",
+        token: "CCCCCCCCCCCCCCCCCCCCCC.1.DDDDDDDDDDDDDDDD",
+        url: "",
+      },
+    ]);
+    expect(message.actions).toHaveLength(MAX_ACTIONS);
+    expect(readPushMessage({ actions: "nope" }, defaults).actions).toEqual([]);
+  });
+
+  it("shows answer buttons only when the app hands their tokens on", async () => {
+    const { scope } = workerScope();
+    const push = () => ({ ...extendable(), data: { json: () => ({ title: "Asked", actions }) } });
+    const withoutAnswers = push();
+    showPushed(scope, withoutAnswers, defaults);
+    const withAnswers = push();
+    showPushed(scope, withAnswers, defaults, true);
+    await Promise.all([...withoutAnswers.work, ...withAnswers.work]);
+
+    const calls = scope.registration.showNotification.mock.calls;
+    expect(calls[0]?.[1].actions).toEqual([{ action: "0", title: "Open" }]);
+    expect(calls[1]?.[1].actions).toEqual([
+      { action: "0", title: "Approve" },
+      { action: "1", title: "Open" },
+      { action: "2", title: "Deny" },
+    ]);
+  });
+
+  function tapped(action: string | undefined) {
+    const message = readPushMessage({ url: "/inbox", actions }, defaults);
+    const close = vi.fn();
+    return {
+      ...extendable(),
+      ...(action === undefined ? {} : { action }),
+      notification: { close, data: { url: message.url, actions: message.actions } },
+      close,
+    };
+  }
+
+  it("hands the token of an answer button to the app and opens nothing", async () => {
+    const { scope } = workerScope();
+    const onAnswer = vi.fn<(token: string) => Promise<unknown>>().mockResolvedValue(undefined);
+    const event = tapped("2");
+    openClicked(scope, event, onAnswer);
+    await Promise.all(event.work);
+
+    expect(event.close).toHaveBeenCalled();
+    expect(onAnswer).toHaveBeenCalledWith("CCCCCCCCCCCCCCCCCCCCCC.1.DDDDDDDDDDDDDDDD");
+    expect(scope.clients.openWindow).not.toHaveBeenCalled();
+  });
+
+  it("opens the page of an open button, and the message's page for anything else", async () => {
+    const { scope } = workerScope();
+    for (const [action, page] of [
+      ["1", "/requests/7"],
+      ["", "/inbox"],
+      [undefined, "/inbox"],
+      ["7", "/inbox"],
+      ["x", "/inbox"],
+    ] as const) {
+      const event = tapped(action);
+      openClicked(scope, event);
+      await Promise.all(event.work);
+      expect(scope.clients.openWindow).toHaveBeenLastCalledWith(`${ORIGIN}${page}`);
+    }
+  });
+
+  it("registers the answer handler with the others", async () => {
+    const { scope, listeners } = workerScope();
+    const onAnswer = vi.fn<(token: string) => Promise<unknown>>().mockResolvedValue(undefined);
+    registerPushHandlers(scope, { defaults, onSubscriptionChange: vi.fn(), onAnswer });
+    const event = tapped("0");
+    listeners.get("notificationclick")?.(event as never);
+    await Promise.all(event.work);
+    expect(onAnswer).toHaveBeenCalledWith("AAAAAAAAAAAAAAAAAAAAAA.0.BBBBBBBBBBBBBBBB");
   });
 });

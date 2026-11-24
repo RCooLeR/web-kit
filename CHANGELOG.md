@@ -9,6 +9,9 @@ The packages were first developed inside [kit](https://github.com/RCooLeR/kit) a
 either repository was published. Their code is unchanged.
 
 - Licensed under MIT; package manifests point at this repository.
+- `webpush/worker`: action buttons. A pushed `actions` list (`open` with a page, `callback` with an
+  answer token) becomes notification buttons; a tapped answer button hands its token to the new
+  `onAnswer` option, which the app sends to its server. Without `onAnswer` only open buttons show.
 - Each package exports its source under the `@rcooler/source` condition. Lint, type check and tests
   in this workspace read siblings through it, so they no longer need a build first.
 
