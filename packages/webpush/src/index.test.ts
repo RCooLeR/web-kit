@@ -127,6 +127,11 @@ describe("pushStatus", () => {
     browser("granted", subscription());
     await expect(pushStatus(options)).resolves.toBe("on");
   });
+
+  it("is off while the subscription was made with a key the server no longer has", async () => {
+    browser("granted", subscription(Uint8Array.from([4, 9, 9, 9])));
+    await expect(pushStatus({ backend: backend(), workerUrl: "/sw.js" })).resolves.toBe("off");
+  });
 });
 
 describe("enablePush", () => {
@@ -231,15 +236,39 @@ describe("refreshPush", () => {
     expect(server.subscribe).toHaveBeenCalledWith(existing.toJSON());
   });
 
-  it("stays silent while notifications are off or the key has changed", async () => {
+  it("stays silent while notifications are off", async () => {
     const server = backend();
     browser("default", subscription());
     await refreshPush({ backend: server });
     browser("granted");
     await refreshPush({ backend: server });
-    browser("granted", subscription(Uint8Array.from([4, 9, 9, 9])));
-    await refreshPush({ backend: server });
 
     expect(server.subscribe).not.toHaveBeenCalled();
+  });
+
+  it("replaces a subscription made with a key the server no longer has", async () => {
+    const stale = subscription(Uint8Array.from([4, 9, 9, 9]));
+    const { pushManager, created } = browser("granted", stale);
+    const server = backend();
+
+    await refreshPush({ backend: server });
+    expect(stale.unsubscribe).toHaveBeenCalled();
+    expect(pushManager.subscribe).toHaveBeenCalledWith({
+      userVisibleOnly: true,
+      applicationServerKey: decodeKey(SERVER_KEY),
+    });
+    expect(server.subscribe).toHaveBeenCalledWith(created.toJSON());
+  });
+
+  it("leaves the status off when the browser cannot subscribe again", async () => {
+    const stale = subscription(Uint8Array.from([4, 9, 9, 9]));
+    const { pushManager } = browser("granted", stale);
+    pushManager.subscribe.mockRejectedValue(new DOMException("no", "AbortError"));
+    pushManager.getSubscription.mockResolvedValueOnce(stale).mockResolvedValue(null);
+    const server = backend();
+
+    await expect(refreshPush({ backend: server })).resolves.toBeUndefined();
+    expect(server.subscribe).not.toHaveBeenCalled();
+    await expect(pushStatus({ backend: server, workerUrl: "/sw.js" })).resolves.toBe("off");
   });
 });

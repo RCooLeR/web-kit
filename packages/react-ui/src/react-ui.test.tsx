@@ -146,6 +146,69 @@ describe("Modal", () => {
     fireEvent.mouseDown(backdrop);
     expect(onClose).toHaveBeenCalledTimes(2);
   });
+
+  function Nested({
+    onCloseOuter,
+    onCloseInner,
+  }: {
+    onCloseOuter: () => void;
+    onCloseInner: () => void;
+  }) {
+    const [outer, setOuter] = useState(true);
+    const [inner, setInner] = useState(false);
+    return (
+      <Modal
+        open={outer}
+        title="Edit"
+        closeLabel="Close edit"
+        onClose={() => {
+          onCloseOuter();
+          setOuter(false);
+        }}
+      >
+        <button type="button" onClick={() => setInner(true)}>
+          Discard
+        </button>
+        <Modal
+          open={inner}
+          title="Discard changes?"
+          closeLabel="Close confirm"
+          onClose={() => {
+            onCloseInner();
+            setInner(false);
+          }}
+          footer={<button type="button">Yes</button>}
+        >
+          <p>The edits are lost.</p>
+        </Modal>
+      </Modal>
+    );
+  }
+
+  it("leaves keys to the dialog opened last, so one Escape closes one dialog", async () => {
+    vi.useFakeTimers();
+    const onCloseOuter = vi.fn();
+    const onCloseInner = vi.fn();
+    render(<Nested onCloseOuter={onCloseOuter} onCloseInner={onCloseInner} />);
+    await act(() => vi.runAllTimersAsync());
+    fireEvent.click(screen.getByRole("button", { name: "Discard" }));
+    await act(() => vi.runAllTimersAsync());
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Close confirm" }));
+
+    // Tab from the confirm's last button wraps inside the confirm, not into the form behind it.
+    screen.getByRole("button", { name: "Yes" }).focus();
+    fireEvent.keyDown(document, { key: "Tab" });
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Close confirm" }));
+
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(onCloseInner).toHaveBeenCalledOnce();
+    expect(onCloseOuter).not.toHaveBeenCalled();
+    expect(screen.getByRole("dialog", { name: "Edit" })).toBeTruthy();
+    expect(screen.queryByRole("dialog", { name: "Discard changes?" })).toBeNull();
+
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(onCloseOuter).toHaveBeenCalledOnce();
+  });
 });
 
 describe("toasts", () => {

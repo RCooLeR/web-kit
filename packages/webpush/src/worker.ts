@@ -217,10 +217,13 @@ function tappedAction(data: unknown, id: string | undefined): PushAction | undef
 }
 
 /**
- * Handles a tap. An answer button hands its token to `onAnswer` and opens nothing. An open button
- * opens its page, the notification itself the message's page: an open app window is brought
- * forward and, when it shows another page, taken to the one asked for; without a window a new one
- * is opened.
+ * Handles a tap. An answer button hands its token to `onAnswer` and opens nothing, unless the
+ * answer did not get through: `onAnswer` rejected (offline) or resolved with a fetch response that
+ * is not ok (a session that ran out, a late tap), or the app hands no tokens on. The message's
+ * page then opens, so the user sees where things stand and can answer there. An open button opens
+ * its page, the notification itself the message's page: an open app window is brought forward
+ * and, when it shows another page, taken to the one asked for; without a window a new one is
+ * opened.
  */
 export function openClicked(
   scope: WorkerScopeLike,
@@ -229,26 +232,36 @@ export function openClicked(
 ): void {
   event.notification.close();
   const action = tappedAction(event.notification.data, event.action);
-  if (action?.kind === "answer") {
-    if (onAnswer) event.waitUntil(onAnswer(action.token));
-    return;
-  }
   const page = action?.kind === "open" ? action.url : notificationUrl(event.notification.data);
   const url = clickTarget(page, scope.location.origin);
-  event.waitUntil(
-    (async () => {
-      const windows = await scope.clients.matchAll({ type: "window", includeUncontrolled: true });
-      const open = windows.find((client) => client.url === url) ?? windows[0];
-      if (!open) {
-        await scope.clients.openWindow(url);
-        return;
-      }
-      const focused = await open.focus().catch(() => open);
-      if (focused.url !== url) {
-        await focused.navigate(url).catch(() => scope.clients.openWindow(url));
-      }
-    })(),
-  );
+  if (action?.kind === "answer") {
+    event.waitUntil(
+      (async () => {
+        if (onAnswer && (await onAnswer(action.token).then(wasTaken, () => false))) return;
+        await openPage(scope, url);
+      })(),
+    );
+    return;
+  }
+  event.waitUntil(openPage(scope, url));
+}
+
+/** Whether what onAnswer resolved with says the server took the answer: anything but a failed fetch. */
+function wasTaken(result: unknown): boolean {
+  return !(typeof result === "object" && result !== null && "ok" in result && result.ok === false);
+}
+
+async function openPage(scope: WorkerScopeLike, url: string): Promise<void> {
+  const windows = await scope.clients.matchAll({ type: "window", includeUncontrolled: true });
+  const open = windows.find((client) => client.url === url) ?? windows[0];
+  if (!open) {
+    await scope.clients.openWindow(url);
+    return;
+  }
+  const focused = await open.focus().catch(() => open);
+  if (focused.url !== url) {
+    await focused.navigate(url).catch(() => scope.clients.openWindow(url));
+  }
 }
 
 /**
@@ -278,7 +291,9 @@ export interface PushHandlerOptions {
   onSubscriptionChange: (subscription: PushSubscriptionJSON) => Promise<unknown>;
   /**
    * Sends the token of a tapped answer button to the app's server, which forwards it to the
-   * notification service. Without it, answer buttons are not shown.
+   * notification service. It rejects, or resolves with a fetch response that is not ok, when the
+   * answer did not get through; the message's page then opens instead. Without it, answer buttons
+   * are not shown.
    */
   onAnswer?: (token: string) => Promise<unknown>;
 }

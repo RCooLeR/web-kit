@@ -333,6 +333,31 @@ describe("action buttons", () => {
     expect(scope.clients.openWindow).not.toHaveBeenCalled();
   });
 
+  it("opens the message's page when the answer does not reach the app's server", async () => {
+    for (const onAnswer of [
+      vi.fn<(token: string) => Promise<unknown>>().mockRejectedValue(new TypeError("offline")),
+      vi.fn<(token: string) => Promise<unknown>>().mockResolvedValue({ ok: false, status: 401 }),
+      undefined,
+    ]) {
+      const { scope } = workerScope();
+      const event = tapped("2");
+      openClicked(scope, event, onAnswer);
+      await Promise.all(event.work);
+      expect(scope.clients.openWindow).toHaveBeenCalledWith(`${ORIGIN}/inbox`);
+    }
+  });
+
+  it("opens nothing once the app's server took the answer", async () => {
+    const { scope } = workerScope();
+    const onAnswer = vi
+      .fn<(token: string) => Promise<unknown>>()
+      .mockResolvedValue({ ok: true, status: 202 });
+    const event = tapped("2");
+    openClicked(scope, event, onAnswer);
+    await Promise.all(event.work);
+    expect(scope.clients.openWindow).not.toHaveBeenCalled();
+  });
+
   it("opens the page of an open button, and the message's page for anything else", async () => {
     const { scope } = workerScope();
     for (const [action, page] of [

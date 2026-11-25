@@ -10,6 +10,12 @@ const focusableSelector = [
   "[tabindex]:not([tabindex='-1'])",
 ].join(",");
 
+/**
+ * The open traps, the one opened last at the end. Every trap listens on the document, so only the
+ * last one answers keys: one Escape closes one dialog, and the dialogs behind it leave Tab alone.
+ */
+const openTraps: object[] = [];
+
 /** The elements inside root that Tab can reach, in document order. */
 export function focusableChildren(root: HTMLElement): HTMLElement[] {
   return Array.from(root.querySelectorAll<HTMLElement>(focusableSelector)).filter(
@@ -20,7 +26,8 @@ export function focusableChildren(root: HTMLElement): HTMLElement[] {
 
 /**
  * While `open`: moves focus into the panel, keeps Tab and Shift+Tab inside it, and calls
- * `onClose` on Escape. When it closes, focus returns to the element that had it before.
+ * `onClose` on Escape. When it closes, focus returns to the element that had it before. With
+ * dialogs open on top of each other, only the one opened last does any of this.
  */
 export function useFocusTrap(
   open: boolean,
@@ -39,7 +46,10 @@ export function useFocusTrap(
       const first = focusableChildren(panel)[0];
       (first ?? panel).focus();
     }, 0);
+    const trap = {};
+    openTraps.push(trap);
     const onKeyDown = (event: KeyboardEvent) => {
+      if (openTraps[openTraps.length - 1] !== trap) return;
       if (event.key === "Escape") {
         event.preventDefault();
         event.stopPropagation();
@@ -70,6 +80,7 @@ export function useFocusTrap(
     return () => {
       window.clearTimeout(focusTimer);
       document.removeEventListener("keydown", onKeyDown);
+      openTraps.splice(openTraps.indexOf(trap), 1);
       previouslyFocused?.focus();
     };
   }, [open, panelRef]);

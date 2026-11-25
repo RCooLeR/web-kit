@@ -72,10 +72,18 @@ async function serverKey(backend: PushBackend): Promise<Uint8Array<ArrayBuffer> 
   return publicKey === "" ? undefined : decodeKey(publicKey);
 }
 
+/**
+ * Tells whether notifications reach this browser. A subscription made with a key the server no
+ * longer has counts as off: nothing sent with the new key arrives.
+ */
 export async function pushStatus(options: PushOptions): Promise<PushStatus> {
-  if (!isPushSupported() || (await serverKey(options.backend)) === undefined) return "unsupported";
+  if (!isPushSupported()) return "unsupported";
+  const key = await serverKey(options.backend);
+  if (key === undefined) return "unsupported";
   if (Notification.permission === "denied") return "blocked";
-  return Notification.permission === "granted" && (await currentSubscription()) ? "on" : "off";
+  if (Notification.permission !== "granted") return "off";
+  const subscription = await currentSubscription();
+  return subscription && isMadeWith(subscription.options.applicationServerKey, key) ? "on" : "off";
 }
 
 /**
@@ -130,14 +138,27 @@ export async function disablePush(options: Pick<PushOptions, "backend">): Promis
 /**
  * Makes sure the server has this browser's subscription under the user who is signed in now: the
  * browser may have replaced it, or somebody else signed in here. Call it after sign-in and at
- * app start. Does nothing while notifications are off or the server's key has changed.
+ * app start. A subscription made with a key the server no longer has is replaced; the permission
+ * is still granted, so that needs no tap. When the browser cannot subscribe again, pushStatus
+ * reports "off" and enablePush starts over. Does nothing while notifications are off.
  */
 export async function refreshPush(options: Pick<PushOptions, "backend">): Promise<void> {
   if (!isPushSupported() || Notification.permission !== "granted") return;
-  const subscription = await currentSubscription();
-  if (!subscription) return;
+  const registration = await navigator.serviceWorker.getRegistration();
+  let subscription = (await registration?.pushManager.getSubscription()) ?? null;
+  if (!registration || !subscription) return;
   const key = await serverKey(options.backend);
-  if (key && isMadeWith(subscription.options.applicationServerKey, key)) {
-    await options.backend.subscribe(subscription.toJSON());
+  if (!key) return;
+  if (!isMadeWith(subscription.options.applicationServerKey, key)) {
+    try {
+      await subscription.unsubscribe();
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: key,
+      });
+    } catch {
+      return;
+    }
   }
+  await options.backend.subscribe(subscription.toJSON());
 }
