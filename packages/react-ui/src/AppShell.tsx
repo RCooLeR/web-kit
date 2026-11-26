@@ -1,7 +1,8 @@
 // The application shell of the shared look: a sidebar with the brand, grouped navigation with
 // counters and a footer with the language and theme switches, and the page beside it. At phone
 // width (760 px and below) a top bar with the brand mark, the page's name and a menu button takes
-// the sidebar's place, and the sidebar opens from that button as a panel over the page.
+// the sidebar's place, and the sidebar opens from that button as a panel over the page. Above
+// that width the sidebar stays in view while the page scrolls.
 import { Fragment, useEffect, useId, useRef, useState, type ReactNode } from "react";
 
 import { Icon, cx } from "./Icon.js";
@@ -188,45 +189,47 @@ export function AppShell(props: AppShellProps) {
             ))}
           </Fragment>
         ))}
-        {signOut && (
-          <button
-            type="button"
-            className="nav out"
-            onClick={() => {
-              closeMenu();
-              signOut.onSignOut();
-            }}
-          >
-            <Icon name="lock" />
-            {signOut.label}
-          </button>
-        )}
-        <div className="foot">
-          <span className="grow ell">{props.footer}</span>
-          {languages && (
-            <div className="hd" role="group" aria-label={languages.label} style={{ gap: 6 }}>
-              {languages.options.map((option) => (
-                <button
-                  key={option.code}
-                  type="button"
-                  className={cx("chip", option.code === languages.current && "ac")}
-                  aria-pressed={option.code === languages.current}
-                  onClick={() => languages.onChange(option.code)}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
+        <div className="sfoot">
+          {signOut && (
+            <button
+              type="button"
+              className="nav out"
+              onClick={() => {
+                closeMenu();
+                signOut.onSignOut();
+              }}
+            >
+              <Icon name="lock" />
+              {signOut.label}
+            </button>
           )}
-          <button
-            type="button"
-            className={cx("btn gh sq", theme === "light" && "on")}
-            aria-label={props.themeLabel}
-            aria-pressed={theme === "light"}
-            onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-          >
-            <Icon name="sun" />
-          </button>
+          <div className="foot">
+            <span className="grow ell">{props.footer}</span>
+            {languages && (
+              <div className="hd" role="group" aria-label={languages.label} style={{ gap: 6 }}>
+                {languages.options.map((option) => (
+                  <button
+                    key={option.code}
+                    type="button"
+                    className={cx("chip", option.code === languages.current && "ac")}
+                    aria-pressed={option.code === languages.current}
+                    onClick={() => languages.onChange(option.code)}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            )}
+            <button
+              type="button"
+              className={cx("btn gh sq", theme === "light" && "on")}
+              aria-label={props.themeLabel}
+              aria-pressed={theme === "light"}
+              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+            >
+              <Icon name="sun" />
+            </button>
+          </div>
         </div>
       </nav>
       <main className="main" inert={menuOpen}>

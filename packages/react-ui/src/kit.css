@@ -838,11 +838,39 @@ textarea.in {
 .side .shut {
   display: none;
 }
-.app button.nav.out {
-  margin-top: auto;
+/* A sidebar with a set height (the phone panel, the sticky desktop one) scrolls instead of
+   squeezing its rows, so a label on two or three lines keeps its own height. */
+.side > * {
+  flex-shrink: 0;
 }
-.out + .foot {
+/* The sign-out and the footer row, together at the bottom of the sidebar. */
+.sfoot {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sfoot .foot {
   margin-top: 0;
+}
+/* Above 760 px the sidebar stays in view while the page scrolls: it is as tall as the window,
+   scrolls on its own when its entries are taller, and keeps its foot pinned at the bottom. */
+@media not all and (max-width: 760px) {
+  .side {
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    height: 100vh;
+    height: 100dvh;
+    overflow-y: auto;
+    padding-bottom: 0;
+  }
+  .sfoot {
+    position: sticky;
+    bottom: 0;
+    background: var(--sf);
+    padding-bottom: 20px;
+  }
 }
 @media (max-width: 760px) {
   .topbar {

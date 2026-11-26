@@ -75,7 +75,9 @@ At 760 px and below the sidebar becomes a menu: a top bar shows the brand mark, 
 name and a menu button (named `menuLabel`, `navLabel` when omitted, and marked while an entry has a
 count), and the sidebar opens from it as a panel with the counters, the switches and the sign-out.
 Choosing an entry, Escape, a tap outside and the panel's close button close it; focus moves into it
-and back. Apps need nothing more than the props above.
+and back. Above 760 px the sidebar stays in view while the page scrolls, scrolls on its own when
+its entries are taller than the window, and keeps the sign-out and the switches at its bottom. Apps
+need nothing more than the props above.
 
 Put `ToastProvider` and every `Modal` inside the shell: the tokens are defined on `.app`. The class
 names are those of the approved previews; a page may use them directly next to the components.

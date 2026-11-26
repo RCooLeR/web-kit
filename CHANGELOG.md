@@ -44,6 +44,11 @@ either repository was published. Their code is unchanged.
   (the menu button's name, `navLabel` by default) and `signOut` (`{ label, onSignOut }`, a button at
   the foot of the sidebar and so in the menu). New `kit.css` classes: `.topbar`, `.scrim`, `.mdot`,
   `.shut`, `.out` and `button.nav`.
+- `react-ui`: above 760 px the `AppShell` sidebar stays in view while the page scrolls: as tall as
+  the window, with its own scroll when its entries are taller, and the sign-out and footer row
+  (new wrapper class `.sfoot`) pinned at its bottom. Sidebar rows no longer shrink when the sidebar
+  has a set height, so a label on several lines no longer overlaps the next entry in the phone
+  panel either.
 - Each package exports its source under the `@rcooler/source` condition. Lint, type check and tests
   in this workspace read siblings through it, so they no longer need a build first.
 

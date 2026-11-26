@@ -212,6 +212,8 @@ describe("AppShell at phone width", () => {
     const button = screen.getByRole("button", { name: "Вийти" });
     expect(navigation.contains(button)).toBe(true);
     expect(button.nextElementSibling?.className).toBe("foot");
+    expect(button.parentElement?.className).toBe("sfoot");
+    expect(navigation.lastElementChild).toBe(button.parentElement);
     fireEvent.click(menu);
     fireEvent.click(button);
     expect(onSignOut).toHaveBeenCalledTimes(1);
