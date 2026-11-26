@@ -1,11 +1,13 @@
 // The application shell of the shared look: a sidebar with the brand, grouped navigation with
 // counters and a footer with the language and theme switches, and the page beside it. At phone
-// width the sidebar stacks above the page.
-import { Fragment, type ReactNode } from "react";
+// width (760 px and below) a top bar with the brand mark, the page's name and a menu button takes
+// the sidebar's place, and the sidebar opens from that button as a panel over the page.
+import { Fragment, useEffect, useId, useRef, useState, type ReactNode } from "react";
 
 import { Icon, cx } from "./Icon.js";
 import type { IconName } from "./icons.js";
 import { useTheme, type Theme } from "./theme.js";
+import { useFocusTrap } from "./useFocusTrap.js";
 
 export interface NavItem {
   href: string;
@@ -33,6 +35,12 @@ export interface LanguageSwitch {
   onChange: (code: string) => void;
 }
 
+export interface SignOut {
+  /** The button's text and accessible name, such as "Вийти". */
+  label: string;
+  onSignOut: () => void;
+}
+
 export interface AppShellProps {
   /** The application's name and what it is, beside its mark. */
   name: ReactNode;
@@ -40,6 +48,8 @@ export interface AppShellProps {
   icon: IconName;
   /** Accessible name of the navigation, such as "Розділи". */
   navLabel: string;
+  /** Accessible name of the phone menu button and of the panel's close button; navLabel when omitted. */
+  menuLabel?: string;
   nav: readonly NavGroup[];
   /** A link to the cockpit above the navigation, when the app knows its address. */
   cockpit?: { href: string; label: ReactNode };
@@ -53,8 +63,13 @@ export interface AppShellProps {
   /** The theme from the app's own state; the shell remembers its own when omitted. */
   theme?: Theme;
   onThemeChange?: (theme: Theme) => void;
+  /** A sign-out button at the foot of the sidebar, and so in the phone menu too. */
+  signOut?: SignOut;
   children: ReactNode;
 }
+
+/** The width at which the sidebar becomes the phone menu; kit.css uses the same. */
+const PHONE_QUERY = "(max-width: 760px)";
 
 export function AppShell(props: AppShellProps) {
   const [ownTheme, setOwnTheme] = useTheme(props.themeKey);
@@ -63,22 +78,92 @@ export function AppShell(props: AppShellProps) {
     if (props.onThemeChange) props.onThemeChange(next);
     if (props.theme === undefined) setOwnTheme(next);
   };
-  const { languages } = props;
+  const { languages, signOut } = props;
+
+  const navId = useId();
+  const sideRef = useRef<HTMLElement>(null);
+  const menuRef = useRef<HTMLButtonElement>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const closeMenu = () => setMenuOpen(false);
+  useFocusTrap(menuOpen, sideRef, closeMenu);
+
+  // The top bar is inert while the panel is open, so the trap may not find the menu button
+  // focused; focus goes back to it here.
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    const button = menuRef.current;
+    return () => button?.focus();
+  }, [menuOpen]);
+
+  // The panel exists only at phone width: widening the window closes it, so no trap stays behind.
+  useEffect(() => {
+    if (!menuOpen || typeof window.matchMedia !== "function") return undefined;
+    const phone = window.matchMedia(PHONE_QUERY);
+    const onChange = () => {
+      if (!phone.matches) setMenuOpen(false);
+    };
+    phone.addEventListener("change", onChange);
+    return () => phone.removeEventListener("change", onChange);
+  }, [menuOpen]);
+
+  const items = props.nav.flatMap((group) => group.items);
+  const current = items.find((item) => item.current);
+  const counted = items.filter((item) => item.count !== undefined && item.count > 0);
+  const menuLabel = props.menuLabel ?? props.navLabel;
 
   return (
     <div className={cx("app", theme === "light" && "light")}>
-      <nav className="side" aria-label={props.navLabel}>
+      <header className="topbar" inert={menuOpen}>
+        <span className="mark">
+          <Icon name={props.icon} />
+        </span>
+        <div className="grow ell bn">{current ? current.label : props.name}</div>
+        <button
+          ref={menuRef}
+          type="button"
+          className="btn gh sq menu"
+          aria-label={menuLabel}
+          aria-expanded={menuOpen}
+          aria-controls={navId}
+          onClick={() => setMenuOpen(true)}
+        >
+          <Icon name="lines" />
+          {counted.length > 0 && (
+            <span
+              className={cx("mdot", counted.some((item) => item.countTone !== "warn") && "bd")}
+              aria-hidden="true"
+            />
+          )}
+        </button>
+      </header>
+      {menuOpen && <div className="scrim" aria-hidden="true" onClick={closeMenu} />}
+      <nav
+        id={navId}
+        ref={sideRef}
+        className={cx("side", menuOpen && "open")}
+        aria-label={props.navLabel}
+      >
         <div className="brand">
           <span className="mark">
             <Icon name={props.icon} />
           </span>
-          <div>
+          <div className="grow">
             <div className="bn">{props.name}</div>
             {props.subtitle !== undefined && <div className="mu sm">{props.subtitle}</div>}
           </div>
+          <button
+            type="button"
+            className="btn gh sq shut"
+            aria-label={menuLabel}
+            aria-expanded={menuOpen}
+            aria-controls={navId}
+            onClick={closeMenu}
+          >
+            <Icon name="close" />
+          </button>
         </div>
         {props.cockpit && (
-          <a className="nav" href={props.cockpit.href}>
+          <a className="nav" href={props.cockpit.href} onClick={closeMenu}>
             <Icon name="cockpit" />
             {props.cockpit.label}
           </a>
@@ -92,6 +177,7 @@ export function AppShell(props: AppShellProps) {
                 className={cx("nav", item.current && "on")}
                 href={item.href}
                 aria-current={item.current ? "page" : undefined}
+                onClick={closeMenu}
               >
                 <Icon name={item.icon} />
                 {item.label}
@@ -102,6 +188,19 @@ export function AppShell(props: AppShellProps) {
             ))}
           </Fragment>
         ))}
+        {signOut && (
+          <button
+            type="button"
+            className="nav out"
+            onClick={() => {
+              closeMenu();
+              signOut.onSignOut();
+            }}
+          >
+            <Icon name="lock" />
+            {signOut.label}
+          </button>
+        )}
         <div className="foot">
           <span className="grow ell">{props.footer}</span>
           {languages && (
@@ -130,7 +229,9 @@ export function AppShell(props: AppShellProps) {
           </button>
         </div>
       </nav>
-      <main className="main">{props.children}</main>
+      <main className="main" inert={menuOpen}>
+        {props.children}
+      </main>
     </div>
   );
 }

@@ -37,6 +37,13 @@ either repository was published. Their code is unchanged.
   Bootstrap's; their props are unchanged. An app moves by loading `@rcooler/react-ui/kit.css` instead
   of Bootstrap and `@rcooler/tokens/tokens.css`, and by putting `ToastProvider` and its modals inside
   `AppShell`. `@rcooler/tokens` is unchanged and no longer needed by such an app.
+- `react-ui`: `AppShell` at phone width (760 px and below): a top bar with the brand mark, the current
+  page's name and a menu button, and the sidebar as a panel opened from it (closes on choosing an
+  entry, Escape, a tap outside or its close button; focus moves in and back; the page behind is
+  inert). The menu button is marked while an entry has a count. New optional props: `menuLabel`
+  (the menu button's name, `navLabel` by default) and `signOut` (`{ label, onSignOut }`, a button at
+  the foot of the sidebar and so in the menu). New `kit.css` classes: `.topbar`, `.scrim`, `.mdot`,
+  `.shut`, `.out` and `button.nav`.
 - Each package exports its source under the `@rcooler/source` condition. Lint, type check and tests
   in this workspace read siblings through it, so they no longer need a build first.
 

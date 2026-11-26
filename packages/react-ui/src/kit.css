@@ -116,7 +116,8 @@ body {
   color: var(--mu);
   padding: 14px 12px 6px;
 }
-.app a.nav {
+.app a.nav,
+.app button.nav {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -126,9 +127,19 @@ body {
   color: var(--mu);
   font-weight: 500;
 }
-.app a.nav:hover {
+.app a.nav:hover,
+.app button.nav:hover {
   background: var(--sf2);
   text-decoration: none;
+}
+.app button.nav {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  font: inherit;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
 }
 .app a.nav.on {
   background: var(--ac-bg);
@@ -795,11 +806,87 @@ textarea.in {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+/* The phone top bar and the navigation panel it opens; above 760 px the bar stays hidden and the
+   sidebar is as it was. */
+.topbar {
+  display: none;
+}
+.topbar .mark {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+.topbar .menu {
+  position: relative;
+  flex-shrink: 0;
+}
+.mdot {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--wr);
+  box-shadow: 0 0 0 2px var(--sf);
+}
+.mdot.bd {
+  background: var(--bd);
+}
+.scrim,
+.side .shut {
+  display: none;
+}
+.app button.nav.out {
+  margin-top: auto;
+}
+.out + .foot {
+  margin-top: 0;
+}
 @media (max-width: 760px) {
-  .side {
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     flex: 1 1 100%;
-    border-right: 0;
+    min-width: 0;
+    min-height: 60px;
+    padding: 8px 10px 8px 16px;
+    background: var(--sf);
     border-bottom: 1px solid var(--ln);
+    position: sticky;
+    top: 0;
+    z-index: 30;
+  }
+  .side {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: min(320px, 86vw);
+    z-index: 45;
+    overflow-y: auto;
+    visibility: hidden;
+    transform: translateX(-100%);
+    transition:
+      transform 0.18s ease,
+      visibility 0.18s;
+  }
+  .side.open {
+    visibility: visible;
+    transform: none;
+  }
+  .side .shut {
+    display: inline-flex;
+    flex-shrink: 0;
+  }
+  .scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 44;
+    background: rgba(5, 7, 10, 0.55);
   }
   .main {
     padding: 20px 16px 32px;
@@ -808,8 +895,10 @@ textarea.in {
   .g2 {
     grid-template-columns: minmax(0, 1fr);
   }
-  .foot {
-    margin-top: 8px;
+}
+@media (max-width: 760px) and (prefers-reduced-motion: reduce) {
+  .side {
+    transition: none;
   }
 }
 @media (max-width: 760px) {

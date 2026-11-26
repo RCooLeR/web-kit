@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { AppShell, type NavGroup } from "./AppShell.js";
+import { AppShell, type NavGroup, type SignOut } from "./AppShell.js";
 import { iconNames } from "./icons.js";
 import {
   CheckLine,
@@ -34,7 +34,7 @@ const nav: NavGroup[] = [
   { label: "Довідка", items: [{ href: "#/help", label: "Довідник", icon: "book" }] },
 ];
 
-function Shell(props: { cockpit?: string }) {
+function Shell(props: { cockpit?: string; nav?: NavGroup[]; signOut?: SignOut }) {
   const [language, setLanguage] = useState("uk");
   return (
     <AppShell
@@ -42,8 +42,9 @@ function Shell(props: { cockpit?: string }) {
       subtitle="Служба сповіщень"
       icon="send"
       navLabel="Розділи"
-      nav={nav}
+      nav={props.nav ?? nav}
       {...(props.cockpit ? { cockpit: { href: props.cockpit, label: "Cockpit" } } : {})}
+      {...(props.signOut ? { signOut: props.signOut } : {})}
       footer="1a2b3c4"
       languages={{
         label: "Мова",
@@ -111,6 +112,113 @@ describe("AppShell", () => {
     fireEvent.click(english);
     expect(english.getAttribute("aria-pressed")).toBe("true");
     expect(english.className).toBe("chip ac");
+  });
+});
+
+describe("AppShell at phone width", () => {
+  const settle = () => act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+  const parts = () => {
+    const bar = document.querySelector<HTMLElement>(".topbar");
+    const menu = bar?.querySelector<HTMLButtonElement>("button.menu");
+    if (!bar || !menu) throw new Error("no top bar");
+    return { bar, menu, navigation: screen.getByRole("navigation", { name: "Розділи" }) };
+  };
+
+  it("names the current page in the top bar and opens the navigation from its menu button", async () => {
+    render(<Shell />);
+    const { bar, menu, navigation } = parts();
+    expect(bar.querySelector(".bn")?.textContent).toBe("Огляд");
+    expect(menu.getAttribute("aria-label")).toBe("Розділи");
+    expect(menu.getAttribute("aria-expanded")).toBe("false");
+    expect(menu.getAttribute("aria-controls")).toBe(navigation.id);
+    expect(navigation.classList.contains("open")).toBe(false);
+    menu.focus();
+    fireEvent.click(menu);
+    expect(menu.getAttribute("aria-expanded")).toBe("true");
+    expect(navigation.classList.contains("open")).toBe(true);
+    expect(bar.hasAttribute("inert")).toBe(true);
+    expect(screen.getByRole("main").hasAttribute("inert")).toBe(true);
+    await settle();
+    expect(navigation.contains(document.activeElement)).toBe(true);
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(navigation.classList.contains("open")).toBe(false);
+    expect(bar.hasAttribute("inert")).toBe(false);
+    expect(document.activeElement).toBe(menu);
+  });
+
+  it("closes on choosing an entry, on a tap outside and with its close button", () => {
+    render(<Shell cockpit="#/cockpit" />);
+    const { menu, navigation } = parts();
+    for (const close of [
+      () => screen.getByRole("link", { name: "Довідник" }),
+      () => screen.getByRole("link", { name: "Cockpit" }),
+      () => document.querySelector(".scrim"),
+      () => navigation.querySelector("button.shut"),
+    ]) {
+      fireEvent.click(menu);
+      expect(navigation.classList.contains("open")).toBe(true);
+      const target = close();
+      if (!target) throw new Error("nothing to tap");
+      fireEvent.click(target);
+      expect(navigation.classList.contains("open")).toBe(false);
+      expect(menu.getAttribute("aria-expanded")).toBe("false");
+    }
+    expect(document.querySelector(".scrim")).toBeNull();
+  });
+
+  it("closes when the window grows past phone width", () => {
+    const listeners: (() => void)[] = [];
+    const query = {
+      matches: true,
+      addEventListener: (_type: string, listener: () => void) => listeners.push(listener),
+      removeEventListener: vi.fn(),
+    };
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn(() => query),
+    );
+    try {
+      render(<Shell />);
+      const { menu, navigation } = parts();
+      fireEvent.click(menu);
+      query.matches = false;
+      act(() => listeners.forEach((listener) => listener()));
+      expect(navigation.classList.contains("open")).toBe(false);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("marks the menu button while an entry has a count, in the problem colour unless all warn", () => {
+    render(<Shell />);
+    expect(parts().menu.querySelector(".mdot")?.className).toBe("mdot");
+    cleanup();
+    render(
+      <Shell nav={[{ items: [{ href: "#/", label: "Огляд", icon: "overview", count: 2 }] }]} />,
+    );
+    expect(parts().menu.querySelector(".mdot")?.className).toBe("mdot bd");
+    cleanup();
+    render(
+      <Shell nav={[{ items: [{ href: "#/", label: "Огляд", icon: "overview", count: 0 }] }]} />,
+    );
+    expect(parts().menu.querySelector(".mdot")).toBeNull();
+    expect(parts().bar.querySelector(".bn")?.textContent).toBe("Herald");
+  });
+
+  it("signs out from a labelled button at the foot of the sidebar, inside the menu", () => {
+    const onSignOut = vi.fn();
+    render(<Shell signOut={{ label: "Вийти", onSignOut }} />);
+    const { menu, navigation } = parts();
+    const button = screen.getByRole("button", { name: "Вийти" });
+    expect(navigation.contains(button)).toBe(true);
+    expect(button.nextElementSibling?.className).toBe("foot");
+    fireEvent.click(menu);
+    fireEvent.click(button);
+    expect(onSignOut).toHaveBeenCalledTimes(1);
+    expect(navigation.classList.contains("open")).toBe(false);
+    cleanup();
+    render(<Shell />);
+    expect(screen.queryByRole("button", { name: "Вийти" })).toBeNull();
   });
 });
 

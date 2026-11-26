@@ -20,7 +20,7 @@ promise yet. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 | `@rcooler/i18n-core` | Typed `uk` and `en` dictionaries, placeholders, plural forms, error text by code | none |
 | `@rcooler/http` | `fetch` with a timeout, `ApiError` with stable codes, answers checked by a schema (any `safeParse`, for example zod) | none |
 | `@rcooler/webpush` | Subscribe, resubscribe after a server key change, and the service worker handlers (`@rcooler/webpush/worker`): show the message with its buttons, open the page, hand an answer button's token to the app | none |
-| `@rcooler/react-ui` | The shared look: `kit.css` (tokens, dark by default), `AppShell` (sidebar, grouped navigation with counters, language and theme switches, optional cockpit link), the parts (`Card`, `Stat`, `Chip`, `Button`, `Row`, `Progress`, `Field`, `Segmented`, `CheckLine`, `MasterDetail`, `Tabs`, `Plate`, `RowGrid`), the icon set, `Modal` with a focus trap, toasts, a sortable `DataTable`, `ErrorBoundary` | React 19.3 (peer) |
+| `@rcooler/react-ui` | The shared look: `kit.css` (tokens, dark by default), `AppShell` (sidebar, grouped navigation with counters, language and theme switches, optional cockpit link and sign-out; a top bar with a menu panel at phone width), the parts (`Card`, `Stat`, `Chip`, `Button`, `Row`, `Progress`, `Field`, `Segmented`, `CheckLine`, `MasterDetail`, `Tabs`, `Plate`, `RowGrid`), the icon set, `Modal` with a focus trap, toasts, a sortable `DataTable`, `ErrorBoundary` | React 19.3 (peer) |
 | `@rcooler/react-i18n` | `createI18n(dictionaries)`: a provider and a hook that give components the translator and a language switch | React 19.3 (peer), `@rcooler/i18n-core` |
 
 Nothing reads the machine's time zone or language implicitly: the zone, the locale and "now" are
@@ -65,10 +65,17 @@ import { AppShell, Card, Chip, Stat } from "@rcooler/react-ui";
   cockpit={cockpitUrl ? { href: cockpitUrl, label: "Cockpit" } : undefined}
   footer={commit}
   languages={{ label: t("language"), current: locale, options: [{ code: "uk", label: "UK" }, { code: "en", label: "EN" }], onChange: setLocale }}
+  signOut={{ label: t("signOut"), onSignOut: signOut }}
 >
   <ToastProvider closeLabel={t("close")}>{page}</ToastProvider>
 </AppShell>
 ```
+
+At 760 px and below the sidebar becomes a menu: a top bar shows the brand mark, the current page's
+name and a menu button (named `menuLabel`, `navLabel` when omitted, and marked while an entry has a
+count), and the sidebar opens from it as a panel with the counters, the switches and the sign-out.
+Choosing an entry, Escape, a tap outside and the panel's close button close it; focus moves into it
+and back. Apps need nothing more than the props above.
 
 Put `ToastProvider` and every `Modal` inside the shell: the tokens are defined on `.app`. The class
 names are those of the approved previews; a page may use them directly next to the components.
