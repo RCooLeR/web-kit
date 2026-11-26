@@ -27,6 +27,16 @@ either repository was published. Their code is unchanged.
 - `react-ui`: `sortRows` treats `null` and `NaN` as missing values, last in both directions.
 - `react-ui`: with modals open on top of each other, only the one opened last answers keys, so one
   Escape closes one dialog.
+- `react-ui`: the shared look of the redesign. `kit.css` (exported as `@rcooler/react-ui/kit.css`):
+  the tokens, dark by default with a remembered light switch, and the classes of the approved
+  previews, plus the parts more than one preview draws. `AppShell`, `useTheme`, the parts (`Card`,
+  `Stat`, `Chip`, `Button`, `ButtonLink`, `Row`, `Progress`, `Field`, `Input`, `Select`,
+  `TextArea`, `Segmented`, `CheckLine`, `MasterDetail`, `Tabs`, `Plate`, `RowGrid`, `Dot`, `Empty`),
+  `Icon`, `IconBadge` and the 71 icons of the previews.
+- `react-ui`, changed markup: `Modal`, the toasts and `DataTable` render `kit.css` classes instead of
+  Bootstrap's; their props are unchanged. An app moves by loading `@rcooler/react-ui/kit.css` instead
+  of Bootstrap and `@rcooler/tokens/tokens.css`, and by putting `ToastProvider` and its modals inside
+  `AppShell`. `@rcooler/tokens` is unchanged and no longer needed by such an app.
 - Each package exports its source under the `@rcooler/source` condition. Lint, type check and tests
   in this workspace read siblings through it, so they no longer need a build first.
 

@@ -20,7 +20,7 @@ promise yet. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 | `@rcooler/i18n-core` | Typed `uk` and `en` dictionaries, placeholders, plural forms, error text by code | none |
 | `@rcooler/http` | `fetch` with a timeout, `ApiError` with stable codes, answers checked by a schema (any `safeParse`, for example zod) | none |
 | `@rcooler/webpush` | Subscribe, resubscribe after a server key change, and the service worker handlers (`@rcooler/webpush/worker`): show the message with its buttons, open the page, hand an answer button's token to the app | none |
-| `@rcooler/react-ui` | `Modal` with a focus trap, a toast queue, a sortable `DataTable`, `ErrorBoundary`, all Bootstrap 5 markup | React 19.3 (peer) |
+| `@rcooler/react-ui` | The shared look: `kit.css` (tokens, dark by default), `AppShell` (sidebar, grouped navigation with counters, language and theme switches, optional cockpit link), the parts (`Card`, `Stat`, `Chip`, `Button`, `Row`, `Progress`, `Field`, `Segmented`, `CheckLine`, `MasterDetail`, `Tabs`, `Plate`, `RowGrid`), the icon set, `Modal` with a focus trap, toasts, a sortable `DataTable`, `ErrorBoundary` | React 19.3 (peer) |
 | `@rcooler/react-i18n` | `createI18n(dictionaries)`: a provider and a hook that give components the translator and a language switch | React 19.3 (peer), `@rcooler/i18n-core` |
 
 Nothing reads the machine's time zone or language implicitly: the zone, the locale and "now" are
@@ -46,6 +46,39 @@ export const { I18nProvider, useI18n } = createI18n({ en, uk }, { storageKey: "a
 The theme values live in `packages/tokens/src/theme.ts` only; the CSS and the JSON are generated
 from that file at build time. A test checks that every Bootstrap variable the theme sets exists in
 the pinned Bootstrap release.
+
+## The shared look
+
+`@rcooler/react-ui/kit.css` is the stylesheet of every app: load it once, instead of Bootstrap (its
+`.btn`, `.card` and `.row` are its own, so the two do not mix). Its tokens live on the `.app`
+element that `AppShell` renders: dark by default, `.light` when the user switches, and the choice is
+remembered in the browser (`useTheme`).
+
+```tsx
+import "@rcooler/react-ui/kit.css";
+import { AppShell, Card, Chip, Stat } from "@rcooler/react-ui";
+
+<AppShell
+  name="Herald" subtitle="Служба сповіщень" icon="send"
+  navLabel={t("nav.label")} themeLabel={t("theme.light")}
+  nav={[{ items: [{ href: "#/", label: t("nav.overview"), icon: "overview", current: true }] }]}
+  cockpit={cockpitUrl ? { href: cockpitUrl, label: "Cockpit" } : undefined}
+  footer={commit}
+  languages={{ label: t("language"), current: locale, options: [{ code: "uk", label: "UK" }, { code: "en", label: "EN" }], onChange: setLocale }}
+>
+  <ToastProvider closeLabel={t("close")}>{page}</ToastProvider>
+</AppShell>
+```
+
+Put `ToastProvider` and every `Modal` inside the shell: the tokens are defined on `.app`. The class
+names are those of the approved previews; a page may use them directly next to the components.
+Beyond the previews' shared stylesheet, `kit.css` has: `.ev` and `.mono` (code text), `.tr` (a grid
+row; its columns come from the `--cols` custom property), `.ar` (right-aligned cell), `.tabs` and
+`.tab`, `.pl` (plate), `.stn` (step number; `.stn.ol` outlined), `.dr` (a selectable row of a master
+list), `.btn.on` and `.btn.bd`, `.sr` (visually hidden), `.empty`, `.fld .hint` and `.fld .err`, and
+the classes of `Modal` (`.dlg-bg`, `.dlg`), the toasts (`.toasts`, `.toast`) and `DataTable` (`.tbl`,
+`.sort`). Fonts are not bundled: Inter and Manrope are used when installed, the system font
+otherwise.
 
 ## Using the packages
 

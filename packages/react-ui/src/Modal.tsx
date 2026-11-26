@@ -1,7 +1,7 @@
-// A Bootstrap 5 modal dialog rendered by React: no Bootstrap JavaScript, focus kept inside while
-// open, Escape and the backdrop close it.
+// A modal dialog in the kit's look: focus kept inside while open, Escape and the backdrop close it.
 import { useId, useRef, type ReactNode } from "react";
 
+import { Icon, cx } from "./Icon.js";
 import { useFocusTrap } from "./useFocusTrap.js";
 
 export interface ModalProps {
@@ -13,7 +13,7 @@ export interface ModalProps {
   children: ReactNode;
   /** Buttons at the bottom; omitted for a dialog without a footer. */
   footer?: ReactNode;
-  /** Bootstrap's modal sizes. */
+  /** Narrower or wider than the default 560 px. */
   size?: "sm" | "lg" | "xl";
   /** Label of the close button, in the app's language. */
   closeLabel: string;
@@ -25,46 +25,34 @@ export function Modal({ open, title, onClose, children, footer, size, closeLabel
   useFocusTrap(open, panelRef, onClose);
   if (!open) return null;
 
-  const dialogClass = ["modal-dialog", "modal-dialog-scrollable", size ? `modal-${size}` : ""]
-    .filter(Boolean)
-    .join(" ");
   return (
-    <>
-      <div className="modal-backdrop show" />
+    <div
+      className="dlg-bg"
+      role="presentation"
+      onMouseDown={(event) => {
+        // Only a press on the backdrop itself closes; a drag that ends outside the panel does not.
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
       <div
-        className="modal d-block"
+        ref={panelRef}
+        className={cx("card dlg", size && `dlg-${size}`)}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
         tabIndex={-1}
-        role="presentation"
-        onMouseDown={(event) => {
-          // Only a press on the backdrop itself closes; a drag that ends outside the panel does not.
-          if (event.target === event.currentTarget) onClose();
-        }}
       >
-        <div className={dialogClass}>
-          <div
-            ref={panelRef}
-            className="modal-content"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={titleId}
-            tabIndex={-1}
-          >
-            <div className="modal-header">
-              <h2 className="modal-title h5" id={titleId}>
-                {title}
-              </h2>
-              <button
-                type="button"
-                className="btn-close"
-                aria-label={closeLabel}
-                onClick={onClose}
-              />
-            </div>
-            <div className="modal-body">{children}</div>
-            {footer !== undefined && <div className="modal-footer">{footer}</div>}
-          </div>
+        <div className="hd">
+          <h2 className="h2" id={titleId}>
+            {title}
+          </h2>
+          <button type="button" className="btn gh sq sp" aria-label={closeLabel} onClick={onClose}>
+            <Icon name="close" />
+          </button>
         </div>
+        <div>{children}</div>
+        {footer !== undefined && <div className="dlg-ft">{footer}</div>}
       </div>
-    </>
+    </div>
   );
 }

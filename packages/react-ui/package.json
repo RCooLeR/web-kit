@@ -1,16 +1,19 @@
 {
   "name": "@rcooler/react-ui",
   "version": "0.1.0",
-  "description": "Bootstrap 5 React components: modal with focus trap, toast queue, sortable table, error boundary.",
+  "description": "The shared look of the web apps: kit.css, the application shell, cards, chips, buttons, forms, tabs, row grids, icons, a modal with focus trap, toasts, a sortable table.",
   "license": "MIT",
   "type": "module",
-  "sideEffects": false,
+  "sideEffects": [
+    "*.css"
+  ],
   "exports": {
     ".": {
       "@rcooler/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
-    }
+    },
+    "./kit.css": "./dist/kit.css"
   },
   "files": [
     "dist"
@@ -30,7 +33,7 @@
     "react": "^19.3.1"
   },
   "scripts": {
-    "build": "node ../../node_modules/@typescript/native/bin/tsc -p tsconfig.build.json",
+    "build": "node ../../node_modules/@typescript/native/bin/tsc -p tsconfig.build.json && node scripts/copy-assets.mjs",
     "typecheck": "node ../../node_modules/@typescript/native/bin/tsc --noEmit -p tsconfig.json"
   }
 }

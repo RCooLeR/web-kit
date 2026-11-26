@@ -1,0 +1,819 @@
+/* @rcooler/react-ui/kit.css: the shared look of the web apps. One shell, one set of parts.
+   Dark by default; .light on the .app element switches the tokens. Load it instead of Bootstrap:
+   its .btn, .card and .row are its own. Class names follow the approved previews. */
+
+/* Tokens and the shell. */
+.app {
+  --bg: #0f1115;
+  --sf: #181b22;
+  --sf2: #222631;
+  --ln: #2c313d;
+  --tx: #e8eaf0;
+  --mu: #a6acba;
+  --ac: #8fb8ff;
+  --ac-ink: #0a2348;
+  --ac-bg: rgba(143, 184, 255, 0.14);
+  --ok: #7ad6a2;
+  --ok-bg: rgba(122, 214, 162, 0.14);
+  --wr: #f3c267;
+  --wr-bg: rgba(243, 194, 103, 0.15);
+  --bd: #ff9189;
+  --bd-bg: rgba(255, 145, 137, 0.15);
+  --or: #f2a65a;
+  background: var(--bg);
+  color: var(--tx);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.4;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  box-sizing: border-box;
+  min-height: 100vh;
+  color-scheme: dark;
+}
+.app.light {
+  --bg: #f3f4f7;
+  --sf: #ffffff;
+  --sf2: #eceff4;
+  --ln: #d9dde6;
+  --tx: #171b23;
+  --mu: #545d6c;
+  --ac: #1f5fcc;
+  --ac-ink: #ffffff;
+  --ac-bg: rgba(31, 95, 204, 0.1);
+  --ok: #0f6b3a;
+  --ok-bg: rgba(15, 107, 58, 0.1);
+  --wr: #7a5200;
+  --wr-bg: rgba(190, 130, 0, 0.16);
+  --bd: #b3261e;
+  --bd-bg: rgba(179, 38, 30, 0.1);
+  --or: #b25e00;
+  color-scheme: light;
+}
+body {
+  margin: 0;
+}
+.app * {
+  box-sizing: border-box;
+}
+.app a {
+  color: var(--ac);
+  text-decoration: none;
+}
+.app a:hover {
+  text-decoration: underline;
+}
+.app :focus-visible {
+  outline: 2px solid var(--ac);
+  outline-offset: 2px;
+}
+.side {
+  flex: 0 0 236px;
+  background: var(--sf);
+  border-right: 1px solid var(--ln);
+  padding: 20px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.main {
+  flex: 999 1 560px;
+  min-width: 0;
+  padding: 28px 32px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 8px 16px;
+}
+.mark {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--ac);
+  color: var(--ac-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.bn {
+  font-family: Manrope, Inter, sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  line-height: 1.2;
+}
+.grp {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mu);
+  padding: 14px 12px 6px;
+}
+.app a.nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 12px;
+  color: var(--mu);
+  font-weight: 500;
+}
+.app a.nav:hover {
+  background: var(--sf2);
+  text-decoration: none;
+}
+.app a.nav.on {
+  background: var(--ac-bg);
+  color: var(--ac);
+}
+.cnt {
+  margin-left: auto;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--bd-bg);
+  color: var(--bd);
+}
+.cnt.wr {
+  background: var(--wr-bg);
+  color: var(--wr);
+}
+.foot {
+  margin-top: auto;
+  padding: 16px 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--mu);
+  font-size: 13px;
+}
+
+/* Icons, headings and text. */
+.i {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.i.s {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2.2;
+}
+.ic {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  background: var(--sf2);
+  color: var(--tx);
+}
+.ic.ac {
+  background: var(--ac-bg);
+  color: var(--ac);
+}
+.ic.ok {
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+.ic.wr {
+  background: var(--wr-bg);
+  color: var(--wr);
+}
+.ic.bd {
+  background: var(--bd-bg);
+  color: var(--bd);
+}
+.h1 {
+  font-family: Manrope, Inter, sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0;
+  line-height: 1.2;
+}
+.h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+.mu {
+  color: var(--mu);
+}
+.sm {
+  font-size: 13px;
+}
+.b {
+  font-weight: 600;
+}
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Parts. */
+.card {
+  background: var(--sf);
+  border: 1px solid var(--ln);
+  border-radius: 18px;
+  padding: 18px 20px;
+  min-width: 0;
+}
+.kv {
+  font-family: Manrope, Inter, sans-serif;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+.g4 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+.g3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.g2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 16px;
+}
+.hd {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.sp {
+  margin-left: auto;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  background: var(--sf2);
+  color: var(--mu);
+}
+.chip.ok {
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+.chip.wr {
+  background: var(--wr-bg);
+  color: var(--wr);
+}
+.chip.bd {
+  background: var(--bd-bg);
+  color: var(--bd);
+}
+.chip.ac {
+  background: var(--ac-bg);
+  color: var(--ac);
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1px solid var(--ln);
+  background: var(--sf2);
+  color: var(--tx);
+  font: inherit;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.btn.pri {
+  background: var(--ac);
+  color: var(--ac-ink);
+  border-color: transparent;
+}
+.btn.gh {
+  background: transparent;
+}
+.btn.sq {
+  width: 44px;
+  padding: 0;
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  border-top: 1px solid var(--ln);
+}
+.row.f {
+  border-top: 0;
+}
+.grow {
+  flex: 1;
+  min-width: 0;
+}
+.ell {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pb {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--sf2);
+  overflow: hidden;
+}
+.pb span {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: var(--ac);
+}
+.in {
+  min-height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--ln);
+  background: var(--bg);
+  color: var(--tx);
+  padding: 0 12px;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+}
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: none;
+  background: var(--ok);
+}
+.dot.off {
+  background: transparent;
+  border: 2px solid var(--bd);
+}
+.dot.wr {
+  background: var(--wr);
+}
+.scroll {
+  overflow-x: auto;
+}
+.md {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 400px;
+  gap: 16px;
+  align-items: start;
+}
+.fld {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.fld label,
+.fld .lb {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mu);
+}
+.sg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.sg .btn {
+  min-height: 44px;
+  padding: 0 12px;
+  font-weight: 500;
+}
+.sg .btn.on {
+  background: var(--ac-bg);
+  color: var(--ac);
+  border-color: var(--ac);
+}
+.kvr {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--ln);
+}
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.ck {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+}
+.ck input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--ac);
+}
+.th {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--mu);
+}
+
+/* Added in web-kit: parts more than one preview draws with local styles, and what real controls need. */
+.ev {
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 12.5px;
+}
+.mono {
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 13px;
+}
+.tr {
+  display: grid;
+  grid-template-columns: var(--cols, minmax(0, 2fr) repeat(3, minmax(0, 1fr)));
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--ln);
+  align-items: center;
+  min-height: 44px;
+}
+.tr.f {
+  border-top: 0;
+}
+.ar {
+  text-align: right;
+}
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  font-weight: 600;
+  color: var(--mu);
+  background: transparent;
+  border: 0;
+  font: inherit;
+  font-weight: 600;
+}
+.app a.tab {
+  color: var(--mu);
+}
+.app a.tab:hover {
+  text-decoration: none;
+  background: var(--sf2);
+}
+.tab.on,
+.app a.tab.on {
+  background: var(--ac-bg);
+  color: var(--ac);
+}
+.pl {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 68px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: var(--sf);
+  border: 1px solid var(--ln);
+  color: var(--tx);
+  min-width: 0;
+}
+.pl .grow {
+  line-height: 1.3;
+}
+.app a.pl {
+  color: var(--tx);
+}
+.app a.pl:hover {
+  text-decoration: none;
+  border-color: var(--ac);
+}
+.stn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--ac-bg);
+  color: var(--ac);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  flex: none;
+}
+.stn.ol {
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: 2px solid var(--ln);
+  font-size: 12px;
+  color: var(--mu);
+}
+.dr {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  min-height: 60px;
+  width: 100%;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+.dr.on {
+  background: var(--ac-bg);
+}
+.app a.dr {
+  color: inherit;
+}
+.app a.dr:hover {
+  text-decoration: none;
+}
+button.dr:hover,
+.app a.dr:hover {
+  background: var(--sf2);
+}
+button.dr.on:hover,
+.app a.dr.on:hover {
+  background: var(--ac-bg);
+}
+.btn {
+  cursor: pointer;
+}
+.btn:hover {
+  border-color: var(--mu);
+}
+.btn.pri:hover {
+  border-color: transparent;
+  filter: brightness(1.08);
+}
+.app a.btn {
+  color: var(--tx);
+}
+.app a.btn.pri {
+  color: var(--ac-ink);
+}
+.app a.btn:hover {
+  text-decoration: none;
+}
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.btn.on {
+  background: var(--ac-bg);
+  color: var(--ac);
+  border-color: var(--ac);
+}
+.btn.bd {
+  background: var(--bd-bg);
+  color: var(--bd);
+  border-color: transparent;
+}
+button.chip {
+  border: 0;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+}
+button.chip::after {
+  content: "";
+  position: absolute;
+  inset: -9px -3px;
+}
+.in:disabled {
+  opacity: 0.6;
+}
+select.in {
+  padding-right: 8px;
+}
+textarea.in {
+  min-height: 96px;
+  padding: 10px 12px;
+  resize: vertical;
+  line-height: 1.4;
+}
+.fld .in {
+  width: 100%;
+}
+.fld .hint {
+  font-size: 13px;
+  color: var(--mu);
+}
+.fld .err {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--bd);
+}
+.in[aria-invalid="true"] {
+  border-color: var(--bd);
+}
+.ck input:focus-visible {
+  outline: 2px solid var(--ac);
+  outline-offset: 2px;
+}
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.empty {
+  padding: 28px 12px;
+  text-align: center;
+  color: var(--mu);
+}
+
+/* Dialog, toasts and the sortable table of react-ui. */
+.dlg-bg {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 7, 10, 0.62);
+  z-index: 40;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 6vh 16px;
+  overflow-y: auto;
+}
+.dlg {
+  width: min(560px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.35);
+}
+.dlg.dlg-sm {
+  width: min(400px, 100%);
+}
+.dlg.dlg-lg {
+  width: min(800px, 100%);
+}
+.dlg.dlg-xl {
+  width: min(1140px, 100%);
+}
+.dlg .dlg-ft {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.toasts {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(380px, calc(100% - 32px));
+}
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 10px 10px 16px;
+  border-radius: 14px;
+  background: var(--sf);
+  border: 1px solid var(--ln);
+  color: var(--tx);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+.toast.ok {
+  border-color: var(--ok);
+}
+.toast.wr {
+  border-color: var(--wr);
+}
+.toast.bd {
+  border-color: var(--bd);
+}
+.toast.ac {
+  border-color: var(--ac);
+}
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.tbl th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--mu);
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--ln);
+  white-space: nowrap;
+}
+.tbl td {
+  padding: 10px;
+  border-top: 1px solid var(--ln);
+  vertical-align: middle;
+}
+.tbl tbody tr:first-child td {
+  border-top: 0;
+}
+.tbl tbody tr:hover td {
+  background: var(--sf2);
+}
+.sort {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+  min-height: 32px;
+  padding: 0;
+}
+
+@media (max-width: 1000px) {
+  .md {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 1000px) {
+  .g4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .g3,
+  .split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 760px) {
+  .side {
+    flex: 1 1 100%;
+    border-right: 0;
+    border-bottom: 1px solid var(--ln);
+  }
+  .main {
+    padding: 20px 16px 32px;
+  }
+  .g4,
+  .g2 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .foot {
+    margin-top: 8px;
+  }
+}
+@media (max-width: 760px) {
+  .tr {
+    min-width: 560px;
+  }
+}

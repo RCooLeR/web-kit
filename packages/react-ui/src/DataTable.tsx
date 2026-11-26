@@ -93,9 +93,9 @@ export function DataTable<Row>({
     );
 
   return (
-    <div className="table-responsive">
-      <table className="table table-hover align-middle mb-0">
-        {caption !== undefined && <caption className="visually-hidden">{caption}</caption>}
+    <div className="scroll">
+      <table className="tbl">
+        {caption !== undefined && <caption className="sr">{caption}</caption>}
         <thead>
           <tr>
             {columns.map((column) => {
@@ -108,11 +108,7 @@ export function DataTable<Row>({
               return (
                 <th key={column.key} scope="col" className={column.className} aria-sort={ariaSort}>
                   {column.sortValue ? (
-                    <button
-                      type="button"
-                      className="btn btn-link btn-sm p-0 text-reset text-decoration-none fw-semibold"
-                      onClick={() => toggle(column.key)}
-                    >
+                    <button type="button" className="sort" onClick={() => toggle(column.key)}>
                       {column.header}
                       {ariaSort && (
                         <span aria-hidden="true">{ariaSort === "ascending" ? " ▲" : " ▼"}</span>
@@ -129,7 +125,7 @@ export function DataTable<Row>({
         <tbody>
           {sorted.length === 0 ? (
             <tr>
-              <td colSpan={columns.length} className="text-center text-body-secondary py-4">
+              <td colSpan={columns.length} className="empty">
                 {empty}
               </td>
             </tr>

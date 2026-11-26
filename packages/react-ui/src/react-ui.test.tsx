@@ -162,7 +162,7 @@ describe("Modal", () => {
     expect(document.activeElement).toBe(opener);
 
     fireEvent.click(opener);
-    const backdrop = document.querySelector(".modal.d-block");
+    const backdrop = document.querySelector(".dlg-bg");
     if (!backdrop) throw new Error("no modal element");
     fireEvent.mouseDown(backdrop);
     expect(onClose).toHaveBeenCalledTimes(2);

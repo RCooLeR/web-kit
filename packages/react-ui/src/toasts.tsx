@@ -1,5 +1,5 @@
-// Short messages in the corner: a queue of at most four, each closing itself after a while, as
-// Bootstrap 5 toasts. The queue logic is a pure function so it can be tested without a DOM.
+// Short messages in the corner: a queue of at most four, each closing itself after a while. The
+// queue logic is a pure function so it can be tested without a DOM.
 import {
   createContext,
   use,
@@ -10,6 +10,9 @@ import {
   useState,
   type ReactNode,
 } from "react";
+
+import { Icon, type Tone } from "./Icon.js";
+import type { IconName } from "./icons.js";
 
 export type ToastLevel = "success" | "info" | "warning" | "danger";
 
@@ -48,6 +51,14 @@ interface ToastApi {
 }
 
 const ToastContext = createContext<ToastApi | null>(null);
+
+/** How each level looks: a colour and an icon, so the level never shows by colour alone. */
+const levelLook: Record<ToastLevel, { className: string; tone: Tone; icon: IconName }> = {
+  success: { className: "ok", tone: "ok", icon: "check" },
+  info: { className: "ac", tone: "accent", icon: "info" },
+  warning: { className: "wr", tone: "warn", icon: "warning" },
+  danger: { className: "bd", tone: "bad", icon: "warning" },
+};
 
 export interface ToastProviderProps {
   children: ReactNode;
@@ -96,27 +107,33 @@ export function ToastProvider({ children, closeLabel }: ToastProviderProps) {
   return (
     <ToastContext value={api}>
       {children}
-      <div className="toast-container position-fixed bottom-0 end-0 p-3" aria-live="polite">
-        {toasts.map((toast) => (
-          <div
-            key={toast.id}
-            className={`toast show border-0 text-bg-${toast.level}`}
-            role={toast.level === "danger" ? "alert" : "status"}
-          >
-            <div className="d-flex">
-              <div className="toast-body">
-                <strong>{toast.title}</strong>
-                {toast.body !== undefined && <div>{toast.body}</div>}
+      <div className="toasts" aria-live="polite">
+        {toasts.map((toast) => {
+          const look = levelLook[toast.level];
+          return (
+            <div
+              key={toast.id}
+              className={`toast ${look.className}`}
+              role={toast.level === "danger" ? "alert" : "status"}
+            >
+              <span style={{ color: `var(--${look.className})`, display: "flex" }}>
+                <Icon name={look.icon} />
+              </span>
+              <div className="grow">
+                <div className="b">{toast.title}</div>
+                {toast.body !== undefined && <div className="mu sm">{toast.body}</div>}
               </div>
               <button
                 type="button"
-                className="btn-close btn-close-white me-2 m-auto"
+                className="btn gh sq"
                 aria-label={closeLabel}
                 onClick={() => dismiss(toast.id)}
-              />
+              >
+                <Icon name="close" />
+              </button>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </ToastContext>
   );

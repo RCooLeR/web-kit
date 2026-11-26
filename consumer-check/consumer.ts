@@ -11,7 +11,14 @@ import { ApiError, createClient, type Schema } from "@rcooler/http";
 import { createTranslator, toLocale, type Dictionary } from "@rcooler/i18n-core";
 import { followSystemColorScheme, tokens, type HexColor } from "@rcooler/tokens";
 import { createI18n } from "@rcooler/react-i18n";
-import { sortRows, type Column } from "@rcooler/react-ui";
+import {
+  iconNames,
+  readTheme,
+  sortRows,
+  type AppShellProps,
+  type Column,
+  type IconName,
+} from "@rcooler/react-ui";
 import { enablePush, type PushBackend, type PushStatus } from "@rcooler/webpush";
 import { registerPushHandlers, type WorkerScopeLike } from "@rcooler/webpush/worker";
 
@@ -30,6 +37,12 @@ export const sorted = sortRows([{ name: "b" }, { name: "a" }], columns, {
   key: "name",
   direction: "asc",
 });
+
+export const firstIcon: IconName | undefined = iconNames[0];
+export const theme = readTheme("consumer.theme");
+export const shellNav: AppShellProps["nav"] = [
+  { items: [{ href: "#/", label: "Home", icon: "overview", current: true }] },
+];
 
 const currency: Currency = "UAH";
 const accent: HexColor = tokens.light.color.accent;
