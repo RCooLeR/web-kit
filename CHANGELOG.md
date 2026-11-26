@@ -49,6 +49,9 @@ either repository was published. Their code is unchanged.
   (new wrapper class `.sfoot`) pinned at its bottom. Sidebar rows no longer shrink when the sidebar
   has a set height, so a label on several lines no longer overlaps the next entry in the phone
   panel either.
+- `react-ui`: at 760 px and below the `AppShell` top bar keeps its height on a page shorter than
+  the screen; it grew to share the spare height with the page (`.app` gets `align-content:
+  flex-start` there).
 - Each package exports its source under the `@rcooler/source` condition. Lint, type check and tests
   in this workspace read siblings through it, so they no longer need a build first.
 

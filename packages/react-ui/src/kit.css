@@ -873,6 +873,12 @@ textarea.in {
   }
 }
 @media (max-width: 760px) {
+  /* The top bar and the page are two flex lines: on a page shorter than the screen, stretched
+     lines would share the spare height and make the bar tall. The page's background is the
+     .app's, so nothing shows under a short page. */
+  .app {
+    align-content: flex-start;
+  }
   .topbar {
     display: flex;
     align-items: center;
