@@ -237,13 +237,36 @@ export function openClicked(
   if (action?.kind === "answer") {
     event.waitUntil(
       (async () => {
-        if (onAnswer && (await onAnswer(action.token).then(wasTaken, () => false))) return;
+        if (onAnswer && (await answered(onAnswer, action.token))) return;
         await openPage(scope, url);
       })(),
     );
     return;
   }
   event.waitUntil(openPage(scope, url));
+}
+
+/**
+ * How long a tap waits for onAnswer before it opens the message's page instead. Browsers let a
+ * worker open a window only for a few seconds after the tap, so an answer that hangs on a bad
+ * connection must not use them up.
+ */
+export const ANSWER_TIMEOUT_MS = 4000;
+
+/** Whether onAnswer said the server took the answer within ANSWER_TIMEOUT_MS. */
+async function answered(
+  onAnswer: (token: string) => Promise<unknown>,
+  token: string,
+): Promise<boolean> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<boolean>((resolve) => {
+    timer = setTimeout(() => resolve(false), ANSWER_TIMEOUT_MS);
+  });
+  try {
+    return await Promise.race([onAnswer(token).then(wasTaken, () => false), timeout]);
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 /** Whether what onAnswer resolved with says the server took the answer: anything but a failed fetch. */

@@ -10,6 +10,7 @@ import {
   showPushed,
   type ShowNotificationOptions,
   type WindowClientLike,
+  ANSWER_TIMEOUT_MS,
 } from "./worker.js";
 
 const ORIGIN = "https://app.example.test";
@@ -382,5 +383,29 @@ describe("action buttons", () => {
     listeners.get("notificationclick")?.(event as never);
     await Promise.all(event.work);
     expect(onAnswer).toHaveBeenCalledWith("AAAAAAAAAAAAAAAAAAAAAA.0.BBBBBBBBBBBBBBBB");
+  });
+});
+
+describe("an answer that takes too long", () => {
+  it("opens the message's page once the answer timeout has passed", async () => {
+    vi.useFakeTimers();
+    try {
+      const { scope } = workerScope();
+      const message = readPushMessage(
+        { url: "/inbox", actions: [{ kind: "callback", title: "Approve", token: "T" }] },
+        { title: "App", tag: "app" },
+      );
+      const event = {
+        ...extendable(),
+        action: "0",
+        notification: { close: vi.fn(), data: { url: message.url, actions: message.actions } },
+      };
+      openClicked(scope, event, () => new Promise(() => undefined));
+      await vi.advanceTimersByTimeAsync(ANSWER_TIMEOUT_MS);
+      await Promise.all(event.work);
+      expect(scope.clients.openWindow).toHaveBeenCalledWith(`${ORIGIN}/inbox`);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

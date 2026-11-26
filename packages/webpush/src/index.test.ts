@@ -44,7 +44,11 @@ function browser(permission: NotificationPermission, existing: FakeSubscription 
     getSubscription: vi.fn(() => Promise.resolve(existing)),
     subscribe: vi.fn(() => Promise.resolve(created)),
   };
-  const registration = { pushManager };
+  const registration = {
+    pushManager,
+    active: { scriptURL: "https://app.example.test/sw.js" },
+    update: vi.fn(() => Promise.resolve()),
+  };
   const serviceWorker = {
     register: vi.fn(() => Promise.resolve(registration)),
     ready: Promise.resolve(registration),
@@ -142,7 +146,7 @@ describe("enablePush", () => {
     await expect(enablePush({ backend: server, workerUrl: "/sw.js" })).resolves.toBe("on");
 
     expect(notification.requestPermission).toHaveBeenCalledOnce();
-    expect(serviceWorker.register).toHaveBeenCalledWith("/sw.js");
+    expect(serviceWorker.register).toHaveBeenCalledWith("/sw.js", { updateViaCache: "none" });
     expect(pushManager.subscribe).toHaveBeenCalledWith({
       userVisibleOnly: true,
       applicationServerKey: decodeKey(SERVER_KEY),
@@ -270,5 +274,41 @@ describe("refreshPush", () => {
     await expect(refreshPush({ backend: server })).resolves.toBeUndefined();
     expect(server.subscribe).not.toHaveBeenCalled();
     await expect(pushStatus({ backend: server, workerUrl: "/sw.js" })).resolves.toBe("off");
+  });
+});
+
+describe("the service worker's registration", () => {
+  it("is registered past the HTTP cache unless the app says otherwise", async () => {
+    const { serviceWorker } = browser("granted");
+    await enablePush({ backend: backend(), workerUrl: "/sw.js" });
+    expect(serviceWorker.register).toHaveBeenLastCalledWith("/sw.js", { updateViaCache: "none" });
+
+    await enablePush({ backend: backend(), workerUrl: "/sw.js", registration: { type: "module" } });
+    expect(serviceWorker.register).toHaveBeenLastCalledWith("/sw.js", {
+      updateViaCache: "none",
+      type: "module",
+    });
+  });
+
+  it("moves to a renamed worker at app start, and looks for an update of the same one", async () => {
+    const { serviceWorker } = browser("granted", subscription());
+    await refreshPush({ backend: backend(), workerUrl: "/sw.4f2a.js" });
+    expect(serviceWorker.register).toHaveBeenCalledWith("/sw.4f2a.js", { updateViaCache: "none" });
+
+    const same = browser("granted", subscription());
+    await refreshPush({ backend: backend(), workerUrl: "/sw.js" });
+    expect(same.serviceWorker.register).not.toHaveBeenCalled();
+    const registration = await same.serviceWorker.getRegistration();
+    expect(registration.update).toHaveBeenCalled();
+  });
+
+  it("tells the server to forget the address a key change replaced", async () => {
+    const stale = subscription(Uint8Array.from([4, 9, 9, 9]));
+    stale.endpoint = "https://push.example.test/send/old";
+    browser("granted", stale);
+    const server = backend();
+    await refreshPush({ backend: server });
+    expect(server.unsubscribe).toHaveBeenCalledWith("https://push.example.test/send/old");
+    expect(server.subscribe).toHaveBeenCalled();
   });
 });

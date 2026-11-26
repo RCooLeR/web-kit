@@ -148,6 +148,8 @@ describe("numbers and money", () => {
     const money = createMoneyFormatter("uk");
     expect(plain(money(1234.5))).toBe("1 234,50 ₴");
     expect(plain(money(0))).toBe("0,00 ₴");
+    // 100.1 - 100 - 0.1: a settled balance must not show as a debt of zero.
+    expect(plain(money(100.1 - 100 - 0.1))).toBe("0,00 ₴");
     expect(plain(money(-15.005))).toMatch(/^-15,0[01] ₴$/);
   });
 

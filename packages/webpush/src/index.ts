@@ -28,6 +28,22 @@ export interface PushOptions {
   backend: PushBackend;
   /** Address of the app's service worker script, such as "/sw.js". */
   workerUrl: string;
+  /**
+   * How the worker is registered. The default fetches the worker and what it imports past the
+   * HTTP cache (`updateViaCache: "none"`), so a long browser cache cannot hold back an update; an
+   * app that registers a module worker passes `{ type: "module" }` here too.
+   */
+  registration?: RegistrationOptions;
+}
+
+/** What refreshPush needs; with workerUrl it also moves the browser to a renamed worker. */
+export type RefreshOptions = Pick<PushOptions, "backend"> &
+  Partial<Pick<PushOptions, "workerUrl" | "registration">>;
+
+function registrationOptions(
+  options: Partial<Pick<PushOptions, "registration">>,
+): RegistrationOptions {
+  return { updateViaCache: "none", ...options.registration };
 }
 
 /**
@@ -102,7 +118,10 @@ export async function enablePush(options: PushOptions): Promise<PushStatus> {
 
   let subscription: PushSubscription;
   try {
-    const registration = await navigator.serviceWorker.register(options.workerUrl);
+    const registration = await navigator.serviceWorker.register(
+      options.workerUrl,
+      registrationOptions(options),
+    );
     await navigator.serviceWorker.ready;
     const existing = await registration.pushManager.getSubscription();
     const isCurrent = existing !== null && isMadeWith(existing.options.applicationServerKey, key);
@@ -138,18 +157,26 @@ export async function disablePush(options: Pick<PushOptions, "backend">): Promis
 /**
  * Makes sure the server has this browser's subscription under the user who is signed in now: the
  * browser may have replaced it, or somebody else signed in here. Call it after sign-in and at
- * app start. A subscription made with a key the server no longer has is replaced; the permission
- * is still granted, so that needs no tap. When the browser cannot subscribe again, pushStatus
- * reports "off" and enablePush starts over. Does nothing while notifications are off.
+ * app start. A subscription made with a key the server no longer has is replaced, and the server
+ * told to forget the old address; the permission is still granted, so that needs no tap. When the
+ * browser cannot subscribe again, pushStatus reports "off" and enablePush starts over. Does
+ * nothing while notifications are off.
+ *
+ * With workerUrl, a browser that runs a worker under another address (the app renamed its worker
+ * file) is moved to the new one, and otherwise asked to look for an update of the worker now.
  */
-export async function refreshPush(options: Pick<PushOptions, "backend">): Promise<void> {
+export async function refreshPush(options: RefreshOptions): Promise<void> {
   if (!isPushSupported() || Notification.permission !== "granted") return;
-  const registration = await navigator.serviceWorker.getRegistration();
+  let registration = await navigator.serviceWorker.getRegistration();
+  if (registration && options.workerUrl) {
+    registration = await currentWorker(registration, options.workerUrl, options);
+  }
   let subscription = (await registration?.pushManager.getSubscription()) ?? null;
   if (!registration || !subscription) return;
   const key = await serverKey(options.backend);
   if (!key) return;
   if (!isMadeWith(subscription.options.applicationServerKey, key)) {
+    const replaced = subscription.endpoint;
     try {
       await subscription.unsubscribe();
       subscription = await registration.pushManager.subscribe({
@@ -159,6 +186,31 @@ export async function refreshPush(options: Pick<PushOptions, "backend">): Promis
     } catch {
       return;
     }
+    if (subscription.endpoint !== replaced) {
+      // As in disablePush: a failure only costs the server one wasted attempt.
+      await options.backend.unsubscribe(replaced).catch(() => undefined);
+    }
   }
   await options.backend.subscribe(subscription.toJSON());
+}
+
+/**
+ * Registers workerUrl when the browser runs a worker under another address, and otherwise asks
+ * for an update check. A failure keeps the registration the browser has.
+ */
+async function currentWorker(
+  registration: ServiceWorkerRegistration,
+  workerUrl: string,
+  options: Partial<Pick<PushOptions, "registration">>,
+): Promise<ServiceWorkerRegistration> {
+  const running = registration.active?.scriptURL;
+  try {
+    if (running && new URL(workerUrl, running).href !== running) {
+      return await navigator.serviceWorker.register(workerUrl, registrationOptions(options));
+    }
+    await registration.update();
+  } catch {
+    // Offline or refused: the worker the browser has still receives notifications.
+  }
+  return registration;
 }

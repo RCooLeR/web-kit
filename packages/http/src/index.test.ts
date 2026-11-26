@@ -203,3 +203,41 @@ describe("isAbort", () => {
     expect(isAbort(undefined)).toBe(false);
   });
 });
+
+describe("a call that ends while its body is read", () => {
+  it("passes the caller's abort on", async () => {
+    const controller = new AbortController();
+    const response = {
+      ok: true,
+      status: 200,
+      json: () => {
+        controller.abort();
+        return Promise.reject(new DOMException("aborted", "AbortError"));
+      },
+    } as unknown as Response;
+    const client = createClient({ baseUrl: "/api", fetch: () => Promise.resolve(response) });
+    const error = await failure(
+      client.request(statusSchema, "GET", "/status", { signal: controller.signal }),
+    );
+    expect(isAbort(error)).toBe(true);
+  });
+
+  it("reports a timeout as a timeout", async () => {
+    const response = {
+      ok: true,
+      status: 200,
+      json: () =>
+        new Promise((_resolve, reject) =>
+          setTimeout(() => reject(new DOMException("timed out", "TimeoutError")), 60),
+        ),
+    } as unknown as Response;
+    const client = createClient({
+      baseUrl: "/api",
+      timeoutMs: 20,
+      fetch: () => Promise.resolve(response),
+    });
+    const error = await failure(client.request(statusSchema, "GET", "/status"));
+    expect(error).toBeInstanceOf(ApiError);
+    expect((error as ApiError).code).toBe("timeout");
+  });
+});

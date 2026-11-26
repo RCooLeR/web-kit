@@ -75,13 +75,25 @@ function serverErrorCode(body: unknown): string | undefined {
   return typeof detail.code === "string" ? detail.code : undefined;
 }
 
-async function readJson(response: Response): Promise<unknown> {
+/**
+ * Reads a JSON body. A body that is not JSON gives undefined, which the caller reports as a bad
+ * response; a call the caller cancelled, or that timed out, while the body was still arriving
+ * ends the same way as one cancelled or timed out before the headers.
+ */
+async function readJson(response: Response, signals?: CallSignals): Promise<unknown> {
   try {
     return (await response.json()) as unknown;
-  } catch {
-    // Not JSON at all: the caller reports it as a bad response.
+  } catch (error) {
+    if (signals?.caller?.aborted) throw error;
+    if (signals?.timeout.aborted) throw new ApiError(0, "timeout");
     return undefined;
   }
+}
+
+/** The signals of one call: the caller's own, and the client's timeout. */
+interface CallSignals {
+  caller: AbortSignal | undefined;
+  timeout: AbortSignal;
 }
 
 /** Returns a client for one backend. */
@@ -89,8 +101,13 @@ export function createClient(options: ClientOptions): Client {
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const credentials = options.credentials ?? "same-origin";
 
-  async function call(method: string, path: string, callOptions: CallOptions): Promise<Response> {
+  async function call(
+    method: string,
+    path: string,
+    callOptions: CallOptions,
+  ): Promise<{ response: Response; signals: CallSignals }> {
     const timeout = AbortSignal.timeout(timeoutMs);
+    const signals: CallSignals = { caller: callOptions.signal, timeout };
     const signal = callOptions.signal ? AbortSignal.any([callOptions.signal, timeout]) : timeout;
     const init: RequestInit = { method, signal, credentials };
     if (callOptions.body !== undefined) {
@@ -107,17 +124,17 @@ export function createClient(options: ClientOptions): Client {
       if (callOptions.signal?.aborted) throw error;
       throw new ApiError(0, timeout.aborted ? "timeout" : "network");
     }
-    if (response.ok) return response;
+    if (response.ok) return { response, signals };
     throw new ApiError(
       response.status,
-      serverErrorCode(await readJson(response)) ?? "bad_response",
+      serverErrorCode(await readJson(response, signals)) ?? "bad_response",
     );
   }
 
   return {
     async request(schema, method, path, callOptions = {}) {
-      const response = await call(method, path, callOptions);
-      const parsed = schema.safeParse(await readJson(response));
+      const { response, signals } = await call(method, path, callOptions);
+      const parsed = schema.safeParse(await readJson(response, signals));
       if (!parsed.success) {
         console.error(`unexpected answer from ${method} ${path}`, parsed.error);
         throw new ApiError(response.status, "bad_response");

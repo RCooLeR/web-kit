@@ -61,12 +61,33 @@ git clone https://github.com/RCooLeR/web-kit.git
 "@rcooler/format": "file:../web-kit/packages/format"
 ```
 
+The path is relative to the app's `package.json`: an app whose frontend lives in `web/` next to a
+`web-kit` checkout beside the project writes `file:../../web-kit/packages/format`. The build writes
+each package's `dist/`, which its `exports` point at, and `@rcooler/tokens/tokens.css` exists only
+after it.
+
 An app that links the React packages this way must make its bundler use one copy of React and of
-the shared packages, because the links resolve into this workspace's own `node_modules`. With Vite:
+the shared packages, because the links resolve into this workspace's own `node_modules`. An app that
+dedupes `@rcooler/i18n-core` links it as its own dependency too. With Vite, which also has to be
+allowed to serve the checkout in development:
 
 ```ts
 resolve: { dedupe: ["react", "react-dom", "@rcooler/i18n-core"] },
+server: { fs: { allow: [".", "../../web-kit"] } },
 ```
+
+### The push worker
+
+Bundle `@rcooler/webpush/worker` into one classic worker file with a fixed name, such as `/sw.js`,
+so the browser finds the same worker at every visit, and serve it with `Cache-Control: no-cache`.
+Keep it out of a CDN's cache and of any browser cache override: a cached worker keeps old code
+running. `enablePush` registers it past the HTTP cache (`updateViaCache: "none"`; a module worker
+passes `registration: { type: "module" }`). Pass `workerUrl` to `refreshPush` at app start too: it
+then moves a browser to a renamed worker and asks for an update of the current one.
+
+`onAnswer` should finish within a few seconds. A tap waits `ANSWER_TIMEOUT_MS` for it and then
+opens the message's page, because browsers allow a worker to open a window only shortly after the
+tap.
 
 ## Development
 

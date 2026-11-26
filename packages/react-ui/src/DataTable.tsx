@@ -37,8 +37,10 @@ export function sortRows<Row>(
   return [...rows].sort((a, b) => {
     const left = valueOf(a);
     const right = valueOf(b);
-    if (left === undefined || right === undefined) {
-      return left === right ? 0 : left === undefined ? 1 : -1;
+    const leftMissing = isMissing(left);
+    const rightMissing = isMissing(right);
+    if (leftMissing || rightMissing) {
+      return leftMissing === rightMissing ? 0 : leftMissing ? 1 : -1;
     }
     const order =
       typeof left === "number" && typeof right === "number"
@@ -46,6 +48,16 @@ export function sortRows<Row>(
         : collator.compare(String(left), String(right));
     return order * factor;
   });
+}
+
+/**
+ * Whether a sort value counts as missing: undefined, and the null and NaN that JSON and Number()
+ * hand over for an unknown value. Missing values sort last in both directions.
+ */
+function isMissing(value: unknown): boolean {
+  return (
+    value === undefined || value === null || (typeof value === "number" && Number.isNaN(value))
+  );
 }
 
 export interface DataTableProps<Row> {

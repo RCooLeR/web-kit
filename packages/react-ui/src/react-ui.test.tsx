@@ -54,6 +54,27 @@ describe("sortRows", () => {
     ).toEqual([7, 3, undefined]);
   });
 
+  it("treats null and NaN as missing, as JSON and Number() hand them over", () => {
+    const loose: { name: string; amount: unknown }[] = [
+      { name: "a", amount: null },
+      { name: "b", amount: 5 },
+      { name: "c", amount: Number.NaN },
+      { name: "d", amount: 2 },
+    ];
+    const byAmount: Column<{ name: string; amount: unknown }>[] = [
+      {
+        key: "amount",
+        header: "Amount",
+        render: (row) => row.name,
+        sortValue: (row) => row.amount as number | undefined,
+      },
+    ];
+    for (const direction of ["asc", "desc"] as const) {
+      const names = sortRows(loose, byAmount, { key: "amount", direction }).map((r) => r.name);
+      expect(names.slice(2).sort()).toEqual(["a", "c"]);
+    }
+  });
+
   it("leaves the order alone without a sort or for a column that cannot sort", () => {
     expect(sortRows(rows, columns, null)).toEqual(rows);
     expect(sortRows(rows, columns, { key: "plain", direction: "asc" })).toEqual(rows);

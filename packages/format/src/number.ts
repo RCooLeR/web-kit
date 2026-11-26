@@ -38,6 +38,8 @@ export function createMoneyFormatter(
         currencyDisplay: "narrowSymbol",
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
+        // A float that rounds to zero, such as 100.1 - 100 - 0.1, shows no minus sign.
+        signDisplay: "negative",
       });
       formatters.set(currency, formatter);
     }

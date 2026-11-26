@@ -15,7 +15,16 @@ either repository was published. Their code is unchanged.
   An answer that does not get through (`onAnswer` rejects or resolves with a response that is not
   ok) opens the message's page instead of vanishing.
 - `webpush`: a subscription made with a key the server no longer has counts as off in
-  `pushStatus`, and `refreshPush` replaces it without a tap.
+  `pushStatus`, and `refreshPush` replaces it without a tap and tells the server to forget the old
+  address.
+- `webpush`: the worker is registered with `updateViaCache: "none"` unless the new `registration`
+  option says otherwise; `refreshPush` takes an optional `workerUrl` and then moves a browser to a
+  renamed worker or asks for an update. `webpush/worker`: a tap waits `ANSWER_TIMEOUT_MS` (4 s) for
+  `onAnswer` before it opens the message's page.
+- `http`: a call cancelled or timed out while its body is read ends as an abort or as `timeout`,
+  not as `bad_response`.
+- `format`: an amount that rounds to zero shows no minus sign.
+- `react-ui`: `sortRows` treats `null` and `NaN` as missing values, last in both directions.
 - `react-ui`: with modals open on top of each other, only the one opened last answers keys, so one
   Escape closes one dialog.
 - Each package exports its source under the `@rcooler/source` condition. Lint, type check and tests
