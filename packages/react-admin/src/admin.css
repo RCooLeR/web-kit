@@ -1,0 +1,1375 @@
+/*
+ * @rcooler/react-admin: the stylesheet of the admin screen patterns.
+ *
+ * Every colour and size comes from a public --rc-admin-* custom property, so an app maps its own
+ * theme (light and dark) onto them, usually on <body>. Unset properties fall back to Bootstrap
+ * 5.3's variables where one fits, then to neutral defaults. Each component root resolves them into
+ * private --_* properties, so the values follow the element they are set on.
+ *
+ * Breakpoints: 760 px and below is the phone layout (the menu becomes a panel, list tables show
+ * their primary column, form tables stack); 761 to 960 px folds the menu to icons.
+ */
+
+:is(
+  .rc-admin-layout,
+  .rc-admin-menu,
+  .rc-screen-header,
+  .rc-screen-options,
+  .rc-notice,
+  .rc-list-table-wrap,
+  .rc-list-views,
+  .rc-list-search,
+  .rc-bulk-actions,
+  .rc-pagination,
+  .rc-postbox,
+  .rc-postboxes,
+  .rc-form-table,
+  .rc-form-actions,
+  .rc-nav-tabs,
+  .rc-page-action,
+  .rc-button,
+  .rc-input
+) {
+  --_ink: var(--rc-admin-ink, var(--bs-body-color, #1d2327));
+  --_muted: var(--rc-admin-muted, var(--bs-secondary-color, #50575e));
+  --_border: var(--rc-admin-border, var(--bs-border-color, #dcdcde));
+  --_control: var(--rc-admin-control, #8c8f94);
+  --_surface: var(--rc-admin-surface, var(--bs-body-bg, #fff));
+  --_wash: var(--rc-admin-wash, #f0f0f1);
+  --_rail: var(--rc-admin-rail, #f6f7f7);
+  --_accent: var(--rc-admin-accent, var(--bs-primary, #2271b1));
+  --_on-accent: var(--rc-admin-on-accent, #fff);
+  --_accent-soft: var(--rc-admin-accent-soft, #f0f6fc);
+  --_danger: var(--rc-admin-danger, var(--bs-danger, #b32d2e));
+  --_focus: var(--rc-admin-focus, #2271b1);
+  --_radius: var(--rc-admin-radius, 6px);
+}
+
+:is(.rc-admin-layout, .rc-admin-menu) {
+  --_menu-bg: var(--rc-admin-menu-bg, #1d2327);
+  --_menu-ink: var(--rc-admin-menu-ink, #f0f0f1);
+  --_menu-muted: var(--rc-admin-menu-muted, #c3c4c7);
+  --_menu-sub: var(--rc-admin-menu-sub, #2c3338);
+  --_menu-current: var(--rc-admin-menu-current, #2271b1);
+  --_menu-current-ink: var(--rc-admin-menu-current-ink, #fff);
+  --_menu-hover: var(--rc-admin-menu-hover, #72aee6);
+  --_menu-focus: var(--rc-admin-menu-focus, #72aee6);
+  --_badge-bg: var(--rc-admin-badge-bg, #d63638);
+  --_badge-ink: var(--rc-admin-badge-ink, #fff);
+  --_bar-bg: var(--rc-admin-bar-bg, #1d2327);
+  --_bar-ink: var(--rc-admin-bar-ink, #f0f0f1);
+  --_menu-width: var(--rc-admin-menu-width, 220px);
+  --_menu-folded: var(--rc-admin-menu-folded-width, 56px);
+  --_bar-height: var(--rc-admin-bar-height, 44px);
+}
+
+.rc-visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Controls */
+
+.rc-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 32px;
+  margin: 0;
+  padding: 0 12px;
+  border: 1px solid var(--_control);
+  border-radius: 5px;
+  background: var(--_surface);
+  color: var(--_ink);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.2;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.rc-button:hover:not(:disabled, [data-disabled]) {
+  border-color: var(--_accent);
+  color: var(--_accent);
+}
+
+.rc-button:disabled,
+.rc-button[data-disabled] {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.rc-button-primary,
+.rc-button-primary:hover:not(:disabled, [data-disabled]) {
+  border-color: var(--_accent);
+  background: var(--_accent);
+  color: var(--_on-accent);
+}
+
+.rc-input {
+  min-height: 32px;
+  max-width: 100%;
+  margin: 0;
+  padding: 0 10px;
+  border: 1px solid var(--_control);
+  border-radius: 5px;
+  background: var(--_surface);
+  color: var(--_ink);
+  font: inherit;
+  font-size: 13.5px;
+}
+
+select.rc-input {
+  padding-inline-end: 28px;
+}
+
+:is(
+  .rc-button,
+  .rc-input,
+  .rc-page-action,
+  .rc-row-action,
+  .rc-sort,
+  .rc-postbox-handle,
+  .rc-notice-dismiss,
+  .rc-screen-meta-toggle,
+  .rc-toggle-row,
+  .rc-list-views a,
+  .rc-list-views button,
+  .rc-nav-tabs .tab
+):focus-visible {
+  outline: 2px solid var(--_focus);
+  outline-offset: 1px;
+}
+
+/* Layout and top bar */
+
+.rc-admin-layout {
+  min-height: 100vh;
+  background: var(--_wash);
+  color: var(--_ink);
+}
+
+.rc-admin-bar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  min-height: var(--_bar-height);
+  background: var(--_bar-bg);
+  color: var(--_bar-ink);
+}
+
+.rc-admin-bar-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: var(--_bar-height);
+  margin: 0;
+  padding: 0 12px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 13.5px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.rc-admin-bar-item:hover {
+  color: var(--_menu-hover);
+}
+
+.rc-admin-bar-spacer {
+  flex: 1 1 auto;
+}
+
+.rc-admin-bar-menu,
+.rc-admin-menu-close {
+  display: none;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  place-items: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.rc-admin-body {
+  display: flex;
+  align-items: stretch;
+  min-height: calc(100vh - var(--_bar-height));
+}
+
+.rc-admin-menu-frame {
+  position: relative;
+  z-index: 20;
+  flex: 0 0 auto;
+  background: var(--_menu-bg);
+}
+
+.rc-admin-content {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: var(--rc-admin-content-padding, 0 24px 40px);
+}
+
+/* Admin menu */
+
+.rc-admin-menu {
+  position: sticky;
+  top: var(--_bar-height);
+  width: var(--_menu-width);
+  padding: 8px 0 16px;
+  color: var(--_menu-ink);
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+.rc-admin-menu-list,
+.rc-admin-menu-sub {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rc-admin-menu-section {
+  position: relative;
+}
+
+/* Scoped under the menu so an app's global link colour does not win. */
+.rc-admin-menu .rc-admin-menu-top {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-height: 40px;
+  padding: 0 14px;
+  color: var(--_menu-ink);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.rc-admin-menu .rc-admin-menu-section:is(:hover, :focus-within) > .rc-admin-menu-top {
+  background: var(--_menu-sub);
+  color: var(--_menu-hover);
+}
+
+.rc-admin-menu .rc-admin-menu-section.is-current > .rc-admin-menu-top,
+.rc-admin-menu .rc-admin-menu-section.is-current:is(:hover, :focus-within) > .rc-admin-menu-top {
+  background: var(--_menu-current);
+  color: var(--_menu-current-ink);
+}
+
+.rc-admin-menu-icon {
+  display: inline-grid;
+  flex: none;
+  width: 20px;
+  place-items: center;
+}
+
+.rc-admin-menu-icon svg {
+  display: block;
+}
+
+.rc-admin-menu-label {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.rc-admin-menu-count {
+  display: inline-grid;
+  min-width: 20px;
+  height: 20px;
+  margin-inline-start: auto;
+  padding: 0 6px;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--_badge-bg);
+  color: var(--_badge-ink);
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.rc-admin-menu-sub {
+  background: var(--_menu-sub);
+}
+
+.rc-admin-menu-head,
+.rc-admin-menu-sub.is-head-only {
+  display: none;
+}
+
+.rc-admin-menu .rc-admin-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 14px 5px 45px;
+  color: var(--_menu-muted);
+  font-size: 13.5px;
+  text-decoration: none;
+}
+
+.rc-admin-menu .rc-admin-menu-item:hover,
+.rc-admin-menu .rc-admin-menu-item:focus-visible {
+  color: var(--_menu-hover);
+}
+
+.rc-admin-menu .rc-admin-menu-item.is-current {
+  color: var(--_menu-current-ink);
+  font-weight: 600;
+}
+
+.rc-admin-menu :is(a, button):focus-visible {
+  outline: 2px solid var(--_menu-focus);
+  outline-offset: -2px;
+}
+
+.rc-admin-menu-section.is-current > .rc-admin-menu-sub {
+  padding: 6px 0 9px;
+}
+
+/* Other sections fly out on hover or focus. Off screen, not hidden, so Tab still reaches them. */
+.rc-admin-menu-section:not(.is-current) > .rc-admin-menu-sub {
+  position: absolute;
+  top: -10000em;
+  left: 100%;
+  z-index: 40;
+  min-width: 190px;
+  padding: 6px 0 8px;
+  border-radius: 0 var(--_radius) var(--_radius) 0;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.3);
+}
+
+.rc-admin-menu-section:not(.is-current):is(:hover, :focus-within) > .rc-admin-menu-sub {
+  top: 0;
+}
+
+.rc-admin-menu .rc-admin-menu-section:not(.is-current) > .rc-admin-menu-sub .rc-admin-menu-item {
+  padding-inline-start: 14px;
+}
+
+.rc-admin-menu-fold {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  min-height: 40px;
+  margin: 10px 0 0;
+  padding: 0 14px;
+  border: 0;
+  background: none;
+  color: var(--_menu-muted);
+  font: inherit;
+  font-size: 13.5px;
+  text-align: start;
+  cursor: pointer;
+}
+
+.rc-admin-menu-fold:hover {
+  color: var(--_menu-hover);
+}
+
+/* Folded: icons only, every submenu a flyout headed by the section's name. */
+.rc-admin-menu[data-folded="true"] {
+  width: var(--_menu-folded);
+}
+
+.rc-admin-menu[data-folded="true"] .rc-admin-menu-top {
+  justify-content: center;
+  padding: 0;
+}
+
+.rc-admin-menu[data-folded="true"]
+  .rc-admin-menu-top
+  > :is(.rc-admin-menu-label, .rc-admin-menu-count) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.rc-admin-menu[data-folded="true"] .rc-admin-menu-section > .rc-admin-menu-sub {
+  position: absolute;
+  top: -10000em;
+  left: 100%;
+  z-index: 40;
+  min-width: 190px;
+  padding: 0 0 8px;
+  border-radius: 0 var(--_radius) var(--_radius) 0;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.3);
+}
+
+.rc-admin-menu[data-folded="true"]
+  .rc-admin-menu-section:is(:hover, :focus-within)
+  > .rc-admin-menu-sub {
+  top: 0;
+}
+
+.rc-admin-menu[data-folded="true"] .rc-admin-menu-sub.is-head-only,
+.rc-admin-menu[data-folded="true"] .rc-admin-menu-head {
+  display: block;
+}
+
+.rc-admin-menu[data-folded="true"] .rc-admin-menu-head {
+  padding: 0 14px;
+  color: var(--_menu-current-ink);
+  font-weight: 620;
+  line-height: 40px;
+}
+
+.rc-admin-menu[data-folded="true"] .rc-admin-menu-item {
+  padding-inline-start: 14px;
+}
+
+.rc-admin-menu[data-folded="true"] .rc-admin-menu-fold {
+  justify-content: center;
+  padding: 0;
+}
+
+.rc-admin-menu[data-folded="true"] .rc-admin-menu-fold .rc-admin-menu-label {
+  display: none;
+}
+
+@media (min-width: 761px) and (max-width: 960px) {
+  .rc-admin-menu {
+    width: var(--_menu-folded);
+  }
+
+  .rc-admin-menu .rc-admin-menu-top {
+    justify-content: center;
+    padding: 0;
+  }
+
+  .rc-admin-menu .rc-admin-menu-top > :is(.rc-admin-menu-label, .rc-admin-menu-count) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .rc-admin-menu .rc-admin-menu-section > .rc-admin-menu-sub {
+    position: absolute;
+    top: -10000em;
+    left: 100%;
+    z-index: 40;
+    min-width: 190px;
+    padding: 0 0 8px;
+    border-radius: 0 var(--_radius) var(--_radius) 0;
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.3);
+  }
+
+  .rc-admin-menu .rc-admin-menu-section:is(:hover, :focus-within) > .rc-admin-menu-sub {
+    top: 0;
+  }
+
+  .rc-admin-menu .rc-admin-menu-sub.is-head-only,
+  .rc-admin-menu .rc-admin-menu-head {
+    display: block;
+  }
+
+  .rc-admin-menu .rc-admin-menu-head {
+    padding: 0 14px;
+    color: var(--_menu-current-ink);
+    font-weight: 620;
+    line-height: 40px;
+  }
+
+  .rc-admin-menu .rc-admin-menu-item {
+    padding-inline-start: 14px;
+  }
+
+  .rc-admin-menu .rc-admin-menu-fold {
+    display: none;
+  }
+}
+
+@media (max-height: 640px) {
+  .rc-admin-menu {
+    position: static;
+  }
+}
+
+/* Phone: the menu is a panel from the top bar, every submenu open, nothing flies out. */
+@media (max-width: 760px) {
+  .rc-admin-bar-menu,
+  .rc-admin-layout[data-menu-open="true"] .rc-admin-menu-close {
+    display: inline-grid;
+  }
+
+  .rc-admin-layout .rc-admin-menu-frame {
+    position: fixed;
+    top: var(--_bar-height);
+    bottom: 0;
+    left: 0;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    width: min(310px, 86vw);
+    overflow-y: auto;
+    visibility: hidden;
+    transform: translateX(-100%);
+  }
+
+  .rc-admin-layout[data-menu-open="true"] .rc-admin-menu-frame {
+    visibility: visible;
+    transform: none;
+  }
+
+  .rc-admin-menu-close {
+    align-self: flex-end;
+    color: var(--_menu-ink);
+  }
+
+  .rc-admin-scrim {
+    position: fixed;
+    inset: var(--_bar-height) 0 0 0;
+    z-index: 45;
+    background: rgb(0 0 0 / 0.5);
+  }
+
+  .rc-admin-layout .rc-admin-menu[data-folded] {
+    position: static;
+    width: auto;
+    padding-top: 0;
+  }
+
+  .rc-admin-layout .rc-admin-menu[data-folded] .rc-admin-menu-top {
+    justify-content: flex-start;
+    min-height: 46px;
+    padding: 0 16px;
+  }
+
+  .rc-admin-layout
+    .rc-admin-menu[data-folded]
+    .rc-admin-menu-top
+    > :is(.rc-admin-menu-label, .rc-admin-menu-count) {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+  }
+
+  .rc-admin-layout .rc-admin-menu[data-folded] .rc-admin-menu-section > .rc-admin-menu-sub {
+    position: static;
+    min-width: 0;
+    padding: 4px 0 8px;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .rc-admin-layout
+    .rc-admin-menu[data-folded]
+    :is(.rc-admin-menu-head, .rc-admin-menu-sub.is-head-only) {
+    display: none;
+  }
+
+  .rc-admin-layout
+    .rc-admin-menu[data-folded]
+    .rc-admin-menu-section
+    > .rc-admin-menu-sub
+    .rc-admin-menu-item {
+    min-height: 40px;
+    padding-inline-start: 47px;
+  }
+
+  .rc-admin-layout .rc-admin-menu[data-folded] .rc-admin-menu-fold {
+    display: none;
+  }
+
+  .rc-admin-content {
+    padding: var(--rc-admin-content-padding-phone, 0 14px 32px);
+  }
+}
+
+/* Screen header, page action, screen options */
+
+.rc-screen-header {
+  margin: 0 0 16px;
+}
+
+.rc-screen-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+  margin-top: 10px;
+}
+
+.rc-screen-title {
+  margin: 0;
+  color: var(--_ink);
+  font-size: 1.5rem;
+  font-weight: 620;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.rc-page-action {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  margin: 0;
+  padding: 0 12px;
+  border: 1px solid var(--_accent);
+  border-radius: 5px;
+  background: var(--_surface);
+  color: var(--_accent);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 560;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.rc-page-action:hover:not(:disabled) {
+  background: var(--_accent-soft);
+}
+
+.rc-page-action:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.rc-screen-options {
+  display: flex;
+  flex-direction: column;
+}
+
+.rc-screen-options-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 16px 28px;
+  padding: 14px 18px 16px;
+  border: 1px solid var(--_border);
+  border-top: 0;
+  border-radius: 0 0 8px 8px;
+  background: var(--_rail);
+  color: var(--_ink);
+  font-size: 14px;
+}
+
+.rc-screen-options-panel[hidden] {
+  display: none;
+}
+
+.rc-screen-options-group {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.rc-screen-options-group legend {
+  margin: 0 0 8px;
+  padding: 0;
+  font-size: 13.5px;
+  font-weight: 650;
+}
+
+.rc-screen-options-choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 16px 6px 0;
+  font-weight: 400;
+}
+
+.rc-screen-options-choice input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--_accent);
+}
+
+.rc-screen-options-number {
+  width: 5.5rem;
+}
+
+.rc-screen-options-actions {
+  grid-column: 1 / -1;
+  padding-top: 12px;
+  border-top: 1px solid var(--_border);
+}
+
+.rc-screen-meta-links {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.rc-screen-meta-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+  padding: 4px 10px 5px;
+  border: 1px solid var(--_border);
+  border-top: 0;
+  border-radius: 0 0 6px 6px;
+  background: var(--_surface);
+  color: var(--_muted);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.rc-screen-meta-toggle[aria-expanded="true"] {
+  background: var(--_rail);
+  color: var(--_ink);
+}
+
+/* Notices */
+
+.rc-notice {
+  --_tone: var(--rc-admin-info, #2271b1);
+  --_tone-bg: var(--rc-admin-info-bg, #f0f6fc);
+  --_tone-border: var(--rc-admin-info-border, #9ec2e6);
+  --_tone-ink: var(--rc-admin-info-ink, var(--_ink));
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0 0 14px;
+  padding: 9px 12px;
+  border: 1px solid var(--_tone-border);
+  border-radius: var(--_radius);
+  background: var(--_tone-bg);
+  color: var(--_tone-ink);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.rc-notice-success {
+  --_tone: var(--rc-admin-success, #00a32a);
+  --_tone-bg: var(--rc-admin-success-bg, #edfaef);
+  --_tone-border: var(--rc-admin-success-border, #68de7c);
+  --_tone-ink: var(--rc-admin-success-ink, var(--_ink));
+}
+
+.rc-notice-warning {
+  --_tone: var(--rc-admin-warning, #996800);
+  --_tone-bg: var(--rc-admin-warning-bg, #fcf9e8);
+  --_tone-border: var(--rc-admin-warning-border, #dba617);
+  --_tone-ink: var(--rc-admin-warning-ink, var(--_ink));
+}
+
+.rc-notice-error {
+  --_tone: var(--rc-admin-error, #d63638);
+  --_tone-bg: var(--rc-admin-error-bg, #fcf0f1);
+  --_tone-border: var(--rc-admin-error-border, #f86368);
+  --_tone-ink: var(--rc-admin-error-ink, var(--_ink));
+}
+
+.rc-notice-inline {
+  margin: 0;
+}
+
+.rc-notice-icon {
+  flex: none;
+  margin-top: 1px;
+  color: var(--_tone);
+}
+
+.rc-notice-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.rc-notice-body > :first-child {
+  margin-top: 0;
+}
+
+.rc-notice-body > :last-child {
+  margin-bottom: 0;
+}
+
+.rc-notice-dismiss {
+  display: inline-grid;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  margin: -6px -6px -6px auto;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: inherit;
+  opacity: 0.75;
+  cursor: pointer;
+}
+
+.rc-notice-dismiss:hover {
+  opacity: 1;
+}
+
+/* List table */
+
+.rc-list-table-wrap {
+  color: var(--_ink);
+}
+
+.rc-list-table-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  margin-bottom: 10px;
+}
+
+.rc-list-views {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+  font-size: 13.5px;
+  list-style: none;
+}
+
+.rc-list-views li + li::before {
+  content: "|";
+  margin: 0 8px;
+  color: var(--_control);
+}
+
+.rc-list-views :is(a, button) {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--_accent);
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.rc-list-views :is(a, button):hover {
+  text-decoration: underline;
+}
+
+.rc-list-views .is-current > :is(a, button) {
+  color: var(--_ink);
+  font-weight: 650;
+}
+
+.rc-list-views-count {
+  color: var(--_muted);
+  font-weight: 400;
+}
+
+.rc-list-search {
+  display: flex;
+  gap: 6px;
+  margin: 0 0 0 auto;
+}
+
+.rc-list-search .rc-input {
+  width: 14rem;
+}
+
+.rc-tablenav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin: 10px 0;
+}
+
+.rc-bulk-actions,
+.rc-list-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.rc-bulk-actions-count {
+  color: var(--_muted);
+  font-size: 13.5px;
+}
+
+.rc-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px 10px;
+  margin-inline-start: auto;
+  color: var(--_muted);
+  font-size: 13.5px;
+}
+
+.rc-pagination-links,
+.rc-pagination-current {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.rc-pagination-current {
+  margin: 0 4px;
+}
+
+.rc-pagination-button {
+  min-width: 32px;
+  padding: 0 6px;
+}
+
+.rc-pagination-input {
+  width: 3.75rem;
+  padding: 0 4px;
+  text-align: center;
+}
+
+.rc-list-table-scroll {
+  overflow-x: auto;
+}
+
+.rc-list-table-loading {
+  margin: 0 0 8px;
+  color: var(--_muted);
+  font-size: 13.5px;
+}
+
+.rc-list-table {
+  width: 100%;
+  border: 1px solid var(--_border);
+  border-collapse: collapse;
+  background: var(--_surface);
+  color: var(--_ink);
+  font-size: 14px;
+}
+
+.rc-list-table :is(th, td) {
+  padding: 10px;
+  text-align: start;
+  vertical-align: top;
+}
+
+.rc-list-table thead :is(th, td) {
+  border-bottom: 1px solid var(--_border);
+  background: var(--_rail);
+  color: var(--_muted);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.rc-list-table tbody tr + tr > * {
+  border-top: 1px solid var(--_border);
+}
+
+.rc-list-table tbody tr:is(:hover, :focus-within) > * {
+  background: var(--_rail);
+}
+
+.rc-list-table tbody tr.is-selected > * {
+  background: var(--_accent-soft);
+}
+
+.rc-list-table .rc-check-column {
+  width: 36px;
+  padding-inline: 12px 0;
+  font-weight: 400;
+}
+
+.rc-check-column input {
+  width: 16px;
+  height: 16px;
+  margin: 2px 0 0;
+  accent-color: var(--_accent);
+}
+
+.rc-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.rc-sort:hover {
+  color: var(--_accent);
+}
+
+.rc-sort .rc-sort-indicator {
+  opacity: 0.45;
+}
+
+.rc-sort.is-sorted {
+  color: var(--_ink);
+}
+
+.rc-sort.is-sorted .rc-sort-indicator {
+  opacity: 1;
+}
+
+.rc-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 4px;
+  font-size: 13px;
+  opacity: 0;
+}
+
+.rc-list-table tr:is(:hover, :focus-within) .rc-row-actions {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .rc-row-actions {
+    opacity: 1;
+  }
+}
+
+.rc-row-action {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--_accent);
+  font: inherit;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.rc-row-action + .rc-row-action {
+  margin-inline-start: 7px;
+  padding-inline-start: 7px;
+  border-inline-start: 1px solid var(--_control);
+}
+
+.rc-row-action:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.rc-row-action.is-danger {
+  color: var(--_danger);
+}
+
+.rc-row-action:disabled {
+  color: var(--_muted);
+  cursor: default;
+}
+
+.rc-toggle-row {
+  display: none;
+}
+
+.rc-list-table .rc-list-table-empty td {
+  padding: 24px 12px;
+  color: var(--_muted);
+  text-align: center;
+}
+
+.rc-skeleton {
+  display: block;
+  width: 70%;
+  height: 12px;
+  border-radius: 6px;
+  background: var(--_border);
+  opacity: 0.6;
+}
+
+.rc-list-table-placeholder:nth-child(2) .rc-skeleton {
+  width: 55%;
+}
+
+.rc-list-table-placeholder:nth-child(3) .rc-skeleton {
+  width: 62%;
+}
+
+@media (max-width: 760px) {
+  .rc-list-search {
+    flex: 1 1 100%;
+    margin-inline-start: 0;
+  }
+
+  .rc-list-search .rc-input {
+    flex: 1 1 auto;
+    width: auto;
+    min-height: 40px;
+  }
+
+  .rc-pagination {
+    margin-inline-start: 0;
+  }
+
+  .rc-list-table thead :is(th, td):not(.rc-column-primary, .rc-check-column) {
+    display: none;
+  }
+
+  .rc-list-table
+    tbody
+    tr:not(.rc-list-table-empty, .rc-list-table-placeholder)
+    td:not(.rc-column-primary) {
+    display: none;
+  }
+
+  .rc-list-table tbody tr.is-expanded td:not(.rc-column-primary) {
+    position: relative;
+    display: block;
+    padding: 4px 10px 4px calc(35% + 10px);
+    border-top: 0;
+  }
+
+  .rc-list-table tbody tr.is-expanded td:not(.rc-column-primary)::before {
+    content: attr(data-colname);
+    position: absolute;
+    left: 10px;
+    width: 35%;
+    color: var(--_muted);
+    font-size: 13px;
+  }
+
+  .rc-list-table .rc-column-primary {
+    position: relative;
+    padding-inline-end: 50px;
+  }
+
+  .rc-toggle-row {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: inline-grid;
+    width: 44px;
+    height: 44px;
+    margin: 0;
+    padding: 0;
+    place-items: center;
+    border: 0;
+    background: none;
+    color: var(--_muted);
+    cursor: pointer;
+  }
+
+  .rc-row-actions {
+    opacity: 1;
+  }
+
+  .rc-row-action {
+    min-height: 32px;
+  }
+}
+
+/* Postboxes */
+
+.rc-postboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.rc-postbox {
+  margin: 0 0 16px;
+  border: 1px solid var(--_border);
+  border-radius: var(--_radius);
+  background: var(--_surface);
+  color: var(--_ink);
+}
+
+.rc-postboxes > .rc-postbox {
+  margin: 0;
+}
+
+.rc-postbox-header {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding-inline-start: 12px;
+  border-bottom: 1px solid var(--_border);
+}
+
+.rc-postbox.is-collapsed .rc-postbox-header {
+  border-bottom: 0;
+}
+
+.rc-postbox-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  padding: 11px 0;
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+.rc-postbox-handle {
+  display: inline-grid;
+  width: 32px;
+  height: 40px;
+  margin: 0;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: var(--_muted);
+  cursor: pointer;
+}
+
+.rc-postbox-handle:hover:not(:disabled) {
+  color: var(--_accent);
+}
+
+.rc-postbox-handle:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.rc-postbox-body {
+  padding: 12px 14px;
+}
+
+.rc-postbox-body[hidden] {
+  display: none;
+}
+
+/* Form table */
+
+.rc-form-table {
+  display: grid;
+  color: var(--_ink);
+  font-size: 14px;
+}
+
+.rc-form-row {
+  display: grid;
+  grid-template-columns: minmax(10rem, 14rem) minmax(0, 1fr);
+  gap: 6px 20px;
+  min-width: 0;
+  margin: 0;
+  padding: 15px 0;
+  border: 0;
+  border-top: 1px solid var(--_border);
+}
+
+.rc-form-row:first-child {
+  border-top: 0;
+}
+
+.rc-form-label {
+  float: left;
+  margin: 0;
+  padding: 6px 0 0;
+  font-weight: 600;
+}
+
+.rc-form-label label {
+  font-weight: inherit;
+}
+
+.rc-form-field {
+  min-width: 0;
+}
+
+.rc-form-description,
+.rc-form-error {
+  margin-top: 6px;
+  font-size: 13px;
+}
+
+.rc-form-description {
+  color: var(--_muted);
+}
+
+.rc-form-error {
+  color: var(--_danger);
+}
+
+.rc-form-row [aria-invalid="true"] {
+  border-color: var(--_danger);
+}
+
+.rc-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--_border);
+}
+
+@media (max-width: 760px) {
+  .rc-form-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rc-form-label {
+    padding-top: 0;
+  }
+}
+
+/* Section tabs (the Tabs of @rcooler/react-ui) */
+
+.rc-nav-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0 0 6px;
+  border-bottom: 1px solid var(--_border);
+}
+
+.rc-nav-tabs .tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 -1px;
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: 6px 6px 0 0;
+  background: none;
+  color: var(--_muted);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 550;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.rc-nav-tabs .tab:hover {
+  color: var(--_ink);
+}
+
+.rc-nav-tabs .tab.on {
+  border-color: var(--_border);
+  background: var(--_surface);
+  color: var(--_ink);
+}
+
+@media print {
+  .rc-admin-bar,
+  .rc-admin-menu-frame,
+  .rc-screen-meta-links,
+  .rc-row-actions {
+    display: none;
+  }
+}

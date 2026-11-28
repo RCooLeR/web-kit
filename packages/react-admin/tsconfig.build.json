@@ -1,0 +1,14 @@
+// The published output: ESM and declarations in dist/, without the tests. A sibling package is
+// read from its built dist/ here (no source condition), as an installed copy would be.
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "declaration": true,
+    "customConditions": [],
+    "jsx": "react-jsx"
+  },
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx"]
+}

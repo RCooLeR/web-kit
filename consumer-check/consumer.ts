@@ -12,6 +12,12 @@ import { createTranslator, toLocale, type Dictionary } from "@rcooler/i18n-core"
 import { followSystemColorScheme, tokens, type HexColor } from "@rcooler/tokens";
 import { createI18n } from "@rcooler/react-i18n";
 import {
+  defaultPaginationLabels,
+  type AdminMenuSection,
+  type ListColumn,
+  type ListTableProps,
+} from "@rcooler/react-admin";
+import {
   iconNames,
   readTheme,
   sortRows,
@@ -84,3 +90,14 @@ export async function demo(scope: WorkerScopeLike): Promise<string[]> {
     status,
   ];
 }
+
+const menu: AdminMenuSection[] = [
+  { key: "articles", label: "Articles", href: "/admin/articles", items: [] },
+];
+const listColumns: ListColumn<{ title: string }>[] = [
+  { key: "title", header: "Title", render: (row) => row.title, sortable: true, primary: true },
+];
+export const listTable: Pick<ListTableProps<{ title: string }>, "columns" | "label"> = {
+  columns: listColumns,
+  label: menu[0]?.key ?? defaultPaginationLabels.items(0),
+};

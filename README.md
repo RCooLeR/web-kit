@@ -21,6 +21,7 @@ promise yet. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 | `@rcooler/http` | `fetch` with a timeout, `ApiError` with stable codes, answers checked by a schema (any `safeParse`, for example zod) | none |
 | `@rcooler/webpush` | Subscribe, resubscribe after a server key change, and the service worker handlers (`@rcooler/webpush/worker`): show the message with its buttons, open the page, hand an answer button's token to the app | none |
 | `@rcooler/react-ui` | The shared look: `kit.css` (tokens, dark by default), `AppShell` (sidebar, grouped navigation with counters, language and theme switches, optional cockpit link and sign-out; a top bar with a menu panel at phone width), the parts (`Card`, `Stat`, `Chip`, `Button`, `Row`, `Progress`, `Field`, `Segmented`, `CheckLine`, `MasterDetail`, `Tabs`, `Plate`, `RowGrid`), the icon set, `Modal` with a focus trap, toasts, a sortable `DataTable`, `ErrorBoundary` | React 19.3 (peer) |
+| `@rcooler/react-admin` | Admin screens in the familiar publishing-dashboard layout: `AdminLayout` (top bar, menu, phone panel), `AdminMenu` (sections with submenus, flyouts, folded), `ScreenHeader` with a page action, `Notice`, `ListTable` with `ListViews`, `ListSearch`, `BulkActions`, `Pagination` and `useListSelection`, `PostBox` and `PostBoxes` with `usePostBoxLayout`, `FormTable`, `ScreenOptions`, `NavTabs`; `admin.css` | React 19.3 (peer), `@rcooler/react-ui` |
 | `@rcooler/react-i18n` | `createI18n(dictionaries)`: a provider and a hook that give components the translator and a language switch | React 19.3 (peer), `@rcooler/i18n-core` |
 
 Nothing reads the machine's time zone or language implicitly: the zone, the locale and "now" are
@@ -108,6 +109,53 @@ import "@rcooler/react-ui/brands/homeledger.css";
 ```
 
 The application loads the brand's fonts (HomeLedger: Onest, and Unbounded for its wordmark).
+
+## Admin screens
+
+`@rcooler/react-admin` draws admin screens in the layout people know from publishing dashboards: a
+top bar, a menu of sections with submenus on the left, and screens built from a screen header,
+notices, list tables, postboxes and form tables. Load `@rcooler/react-admin/admin.css` once. It
+works beside Bootstrap or on its own: every class starts with `rc-`, and every colour and size is a
+custom property the app maps onto its own theme, light and dark, usually on `<body>`. Unset
+properties fall back to Bootstrap's variables where one fits, then to neutral defaults.
+
+| Custom property | What it colours or sizes |
+|---|---|
+| `--rc-admin-ink`, `--rc-admin-muted` | Text and secondary text |
+| `--rc-admin-surface`, `--rc-admin-wash`, `--rc-admin-rail` | Boxes and tables, the page behind them, table headers and row hover |
+| `--rc-admin-border`, `--rc-admin-control` | Box borders, control borders |
+| `--rc-admin-accent`, `--rc-admin-on-accent`, `--rc-admin-accent-soft` | Links, primary buttons and their text, selected rows |
+| `--rc-admin-danger`, `--rc-admin-focus`, `--rc-admin-radius` | Destructive actions, the focus ring, box corners |
+| `--rc-admin-success`, `-warning`, `-error`, `-info`, each with `-bg`, `-border`, `-ink` | Notices |
+| `--rc-admin-menu-bg`, `-ink`, `-muted`, `-sub`, `-current`, `-current-ink`, `-hover`, `-focus` | The menu, its submenus and current entry |
+| `--rc-admin-badge-bg`, `--rc-admin-badge-ink`, `--rc-admin-bar-bg`, `--rc-admin-bar-ink` | Menu counts, the top bar |
+| `--rc-admin-menu-width`, `--rc-admin-menu-folded-width`, `--rc-admin-bar-height`, `--rc-admin-content-padding` | Sizes (220 px, 56 px, 44 px, `0 24px 40px`) |
+
+```tsx
+import "@rcooler/react-admin/admin.css";
+import { AdminLayout, ListTable, ScreenHeader, useListSelection } from "@rcooler/react-admin";
+
+<AdminLayout
+  bar={<a className="rc-admin-bar-item" href="/">Site</a>}
+  menuButtonLabel={t("menu")}
+  menu={{ label: t("workspace"), sections, folded, onFoldedChange: setFolded, onNavigate }}
+>
+  <main>
+    <ScreenHeader title={t("articles")} action={{ label: t("addNew"), href: "/admin/articles/new" }} />
+    <ListTable label={t("articles")} rows={rows} rowKey={(row) => row.id} columns={columns}
+      selection={selection} sort={sort} onSort={setSort} pagination={{ page, pageCount, onPage }} />
+  </main>
+</AdminLayout>
+```
+
+Menu entries, views, sortable headers and pagination render real links when they have an address,
+so a router can intercept their clicks (`onNavigate`, or one click handler on the document) and
+readers can open them in a new tab. The current section shows its submenu in place, the others open
+theirs on hover or keyboard focus; folded (by choice, or between 761 and 960 px) the menu shows
+icons, and at 760 px and below it opens from the top bar as a panel with every submenu open. A list
+table at phone width keeps its primary column and a button per row that shows the other columns.
+Texts come from the app; the English defaults (`defaultListTableLabels`, `defaultPaginationLabels`,
+`defaultPostBoxLabels` and the `label` props) are there for tests and prototypes.
 
 ## Using the packages
 

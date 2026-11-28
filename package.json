@@ -16,6 +16,7 @@
     "packages/http",
     "packages/webpush",
     "packages/react-ui",
+    "packages/react-admin",
     "packages/react-i18n"
   ],
   "scripts": {

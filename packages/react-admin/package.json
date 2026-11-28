@@ -1,0 +1,42 @@
+{
+  "name": "@rcooler/react-admin",
+  "version": "0.1.0",
+  "description": "Admin screen patterns in the familiar publishing-dashboard layout: the admin layout and menu with submenus, screen header, notices, list table with its parts, postboxes, form table and screen options.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": [
+    "*.css"
+  ],
+  "exports": {
+    ".": {
+      "@rcooler/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./admin.css": "./dist/admin.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RCooLeR/web-kit.git",
+    "directory": "packages/react-admin"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "peerDependencies": {
+    "react": "^19.3.1"
+  },
+  "scripts": {
+    "build": "node ../../node_modules/@typescript/native/bin/tsc -p tsconfig.build.json && node scripts/copy-assets.mjs",
+    "typecheck": "node ../../node_modules/@typescript/native/bin/tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@rcooler/react-ui": "0.1.0"
+  }
+}
