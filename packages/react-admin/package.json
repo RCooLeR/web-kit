@@ -1,6 +1,6 @@
 {
   "name": "@rcooler/react-admin",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Admin screen patterns in the familiar publishing-dashboard layout: the admin layout and menu with submenus, screen header, notices, list table with its parts, postboxes, form table and screen options.",
   "license": "MIT",
   "type": "module",
@@ -38,6 +38,6 @@
     "typecheck": "node ../../node_modules/@typescript/native/bin/tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@rcooler/react-ui": "0.2.0"
+    "@rcooler/react-ui": "0.3.0"
   }
 }

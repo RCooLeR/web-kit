@@ -5,6 +5,8 @@ change interfaces; such changes are listed here.
 
 ## Unreleased
 
+## 0.3.0 (2026-11-28)
+
 - `react-signin`, new and published for the first time: the shared sign-in on one backend API.
   `SignInCard` asks for the password (and the login where an app has several accounts), then the
   authenticator code when the server answers `authenticator_required`, and offers single sign-on
@@ -25,8 +27,8 @@ change interfaces; such changes are listed here.
 
 - No code changes since 0.1.1. This is the version to install; 0.1.0 and 0.1.1 are deprecated on
   npm.
-- Published from the admin-patterns line: `react-signin` and the `react-ui` additions above were
-  not in it; they follow in the next version.
+- Published from the admin-patterns line: `react-signin` and the `react-ui` additions were not in
+  it; they follow in 0.3.0.
 
 ## 0.1.1 (2026-11-28)
 

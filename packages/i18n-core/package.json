@@ -1,6 +1,6 @@
 {
   "name": "@rcooler/i18n-core",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Typed uk and en dictionaries, placeholders, plural forms and error texts by code; no UI framework.",
   "license": "MIT",
   "type": "module",

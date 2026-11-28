@@ -1,6 +1,6 @@
 {
   "name": "@rcooler/react-signin",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "The shared sign-in: a sign-in card with password, authenticator code and single sign-on, and a sign-in security panel, on one backend API.",
   "license": "MIT",
   "type": "module",
@@ -38,8 +38,8 @@
     "typecheck": "node ../../node_modules/@typescript/native/bin/tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@rcooler/http": "0.2.0",
-    "@rcooler/react-ui": "0.2.0",
+    "@rcooler/http": "0.3.0",
+    "@rcooler/react-ui": "0.3.0",
     "uqr": "0.1.3"
   }
 }
