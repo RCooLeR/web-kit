@@ -5,6 +5,10 @@ change interfaces; such changes are listed here.
 
 ## Unreleased
 
+- `react-ui`: a mark inside a card, such as the sign-in card's, takes `--mark-card` and
+  `--mark-card-ink`, which default to `--mark` and `--mark-ink`. HomeLedger's light theme sets the
+  deep teal there, so its logo no longer turns white on the white card.
+
 ## 0.3.0 (2026-11-28)
 
 - `react-signin`, new and published for the first time: the shared sign-in on one backend API.

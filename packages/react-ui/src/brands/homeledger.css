@@ -54,4 +54,6 @@
   --bd: #8a2e1f;
   --bd-bg: #f8e1dc;
   --side: #12403f;
+  /* The light mark is for the teal sidebar; on the white card the logo takes the deep teal. */
+  --mark-card-ink: #12403f;
 }

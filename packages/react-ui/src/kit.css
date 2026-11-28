@@ -30,6 +30,9 @@
   --pri-ink: var(--ac-ink);
   --mark: var(--ac);
   --mark-ink: var(--ac-ink);
+  /* The mark inside a card, such as the sign-in card; the sidebar's mark unless a brand differs. */
+  --mark-card: var(--mark);
+  --mark-card-ink: var(--mark-ink);
   /* The sidebar, and the top bar that replaces it at phone width. */
   --side: var(--sf);
   --side-ink: var(--tx);
@@ -121,6 +124,10 @@ body {
   align-items: center;
   justify-content: center;
   flex: none;
+}
+.card .mark {
+  background: var(--mark-card);
+  color: var(--mark-card-ink);
 }
 .bn {
   font-family: var(--font-display);

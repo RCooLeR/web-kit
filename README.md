@@ -104,7 +104,8 @@ otherwise.
 An application with its own brand keeps the same components and markup and sets tokens. kit.css
 reads every brand-specific value from a custom property on `.app` whose default is the rcooler
 look: `--font` and `--font-display`, the corners `--r-card` and `--r-ctl`, the main button `--pri`
-and `--pri-ink`, the mark `--mark` and `--mark-ink`, and the sidebar and the phone top bar
+and `--pri-ink`, the mark `--mark` and `--mark-ink` (and `--mark-card`, `--mark-card-ink` for a mark
+inside a card, such as the sign-in card's), and the sidebar and the phone top bar
 (`--side`, `--side-ink`, `--side-mu`, `--side-dim`, `--side-ln`, `--side-hover`, `--side-on`,
 `--side-on-ink`). A brand stylesheet sets them, and the theme tokens, on `.app[data-brand="…"]`
 and `.app.light[data-brand="…"]`; `AppShell`'s `brand` prop sets the attribute and `mark` draws the

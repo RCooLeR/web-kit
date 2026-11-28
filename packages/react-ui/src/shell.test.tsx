@@ -17,6 +17,8 @@ import {
   Tabs,
 } from "./parts.js";
 import { DEFAULT_THEME_KEY } from "./theme.js";
+import homeledgerCss from "./brands/homeledger.css?raw";
+import kitCss from "./kit.css?raw";
 
 afterEach(() => {
   cleanup();
@@ -132,6 +134,22 @@ describe("AppShell brands", () => {
       </AppShell>,
     );
     expect(document.querySelector(".app")?.getAttribute("data-brand")).toBe("homeledger");
+  });
+
+  // jsdom does not resolve var(), so the rules are read as text; a browser render checks the colours.
+  it("colours a mark inside a card from card tokens that default to the sidebar's mark", () => {
+    const rule = (css: string, selector: string) => {
+      const start = css.indexOf(`\n${selector} {`);
+      return start < 0 ? "" : css.slice(start, css.indexOf("}", start));
+    };
+    expect(rule(kitCss, ".app")).toContain("--mark-card: var(--mark);");
+    expect(rule(kitCss, ".app")).toContain("--mark-card-ink: var(--mark-ink);");
+    expect(rule(kitCss, ".card .mark")).toContain("background: var(--mark-card);");
+    expect(rule(kitCss, ".card .mark")).toContain("color: var(--mark-card-ink);");
+    // HomeLedger's mark is light for its dark sidebar; on its white card it takes the deep teal.
+    expect(rule(homeledgerCss, '.app.light[data-brand="homeledger"]')).toContain(
+      "--mark-card-ink: #12403f;",
+    );
   });
 
   it("draws the brand's own mark instead of an icon, in the sidebar and the top bar", () => {
