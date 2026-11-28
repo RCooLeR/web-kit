@@ -1,6 +1,6 @@
 {
   "name": "@rcooler/webpush",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Web Push in the browser: subscribe, resubscribe after a key change, and the service worker handlers.",
   "license": "MIT",
   "type": "module",

@@ -1,6 +1,6 @@
 {
   "name": "@rcooler/tokens",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A theme as Bootstrap 5 variable overrides, light and dark, with a JSON export.",
   "license": "MIT",
   "type": "module",
