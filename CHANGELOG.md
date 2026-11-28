@@ -5,14 +5,14 @@ change interfaces; such changes are listed here.
 
 ## Unreleased
 
-## 0.2.0 (2026-11-28)
-
-- `react-signin`, new: the shared sign-in on one backend API. `SignInCard` asks for the password
-  (and the login where an app has several accounts), then the authenticator code when the server
-  answers `authenticator_required`, and offers single sign-on when `GET /federation` says it is
-  enabled, with a passive check once per tab (`skipPassiveCheck`). `SecurityPanel` turns an
-  authenticator app on (QR code, key, password and a first code) and off (password and a current
-  code), and links or unlinks the single sign-on account. `createSignInApi` holds the calls,
+- `react-signin`, new and published for the first time: the shared sign-in on one backend API.
+  `SignInCard` asks for the password (and the login where an app has several accounts), then the
+  authenticator code when the server answers `authenticator_required`, and offers single sign-on
+  when `GET /federation` says it is enabled, with a passive check once per tab (`skipPassiveCheck`).
+  `SecurityPanel` turns an authenticator app on (QR code, key, password and a first code) and off
+  (password and a current code), and links or unlinks the single sign-on account; after turning it
+  on, it asks `GET /session` and shows the sign-in only when the session ended, and
+  `authenticator_off` refreshes it like `authenticator_on`. `createSignInApi` holds the calls,
   `readFederationResult` and `clearFederationResult` the callback's `?signin=` and `?link=` values.
   English and Ukrainian texts; `signin.css` (exported as `@rcooler/react-signin/signin.css`).
 - `react-ui`: icons `eye`, `link`, `unlink`, `copy`, `shield-check` and `cloud-off`.
@@ -20,6 +20,13 @@ change interfaces; such changes are listed here.
   `account` (the signed-in person at the foot of the sidebar) and `phoneTabs` (a tab bar at the
   bottom of the phone screen, with a last tab that can open the menu), and a nav count can take
   `countTone: "brand"`, drawn in the brand's main colour.
+
+## 0.2.0 (2026-11-28)
+
+- No code changes since 0.1.1. This is the version to install; 0.1.0 and 0.1.1 are deprecated on
+  npm.
+- Published from the admin-patterns line: `react-signin` and the `react-ui` additions above were
+  not in it; they follow in the next version.
 
 ## 0.1.1 (2026-11-28)
 
