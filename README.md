@@ -206,10 +206,11 @@ routes the same way; errors are kit `jsonhttp` envelopes, and the components rea
 | `POST /session/authenticator` | `{password, setup_token, code}` | 204; the app may end every session, this one too, so the panel asks `GET /session` after it; 409 `setup_expired` |
 | `DELETE /session/authenticator` | `{password, code}` | 204 |
 | `GET /session/federation` | | `{enabled, linked, issuer?, linked_at?, by?}`; 404 counts as not offered |
-| `DELETE /session/federation` | | `{unlinked}` |
+| `DELETE /session/federation` | | `{unlinked}`; 409 `only_sign_in` when the account has no password, so single sign-on is its only way in |
 
 The card shows the single sign-on button only when `GET /federation` says `enabled`, so an app
-without it (404) gets the same card with password and code alone. When the issuer allows it, the
+without it (404) gets the same card with password and code alone. When `GET /session` says
+`login_configured: false` and single sign-on is enabled, the card shows that button alone. When the issuer allows it, the
 card asks the issuer's session passively once per tab; call `skipPassiveCheck()` on sign-out, or the
 person is signed straight back in. `account` adds the login field. The callback lands on the
 public address: `readFederationResult` tells the app which screen to show (a `link` result belongs

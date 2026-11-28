@@ -55,7 +55,13 @@ interface Loaded {
 /** The text of a refused change, or "session" when the session ended. */
 type Failure = keyof Pick<
   SecurityLabels,
-  "wrongPassword" | "badCode" | "setupExpired" | "locked" | "unavailable" | "ssoOutage"
+  | "wrongPassword"
+  | "badCode"
+  | "setupExpired"
+  | "locked"
+  | "unavailable"
+  | "ssoOutage"
+  | "onlySignIn"
 >;
 
 function failureOf(code: string): Failure | "session" {
@@ -72,6 +78,8 @@ function failureOf(code: string): Failure | "session" {
       return "locked";
     case "federation_unavailable":
       return "ssoOutage";
+    case "only_sign_in":
+      return "onlySignIn";
     default:
       return "unavailable";
   }
@@ -537,7 +545,12 @@ function SsoSection({
   return (
     <Section icon="shield-check" title={labels.ssoTitle} intro={labels.ssoIntro} chip={chip}>
       <LinkResultAlert result={linkResult} labels={labels} />
-      {failure && <Alert tone="bad" icon="warning" title={labels[failure]} />}
+      {failure &&
+        (failure === "onlySignIn" ? (
+          <Alert tone="warn" icon="key" title={labels.onlySignIn} />
+        ) : (
+          <Alert tone="bad" icon="warning" title={labels[failure]} />
+        ))}
       {status.linked ? (
         <>
           <div className="kvr sec-first">

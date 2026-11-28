@@ -1,6 +1,8 @@
 // The sign-in card: password first, then the authenticator code when the account has one, and the
 // single sign-on button when the app offers it. The same card serves every app; HomeLedger shows
-// it without single sign-on, because its GET /federation answers 404.
+// it without single sign-on, because its GET /federation answers 404. When GET /session says no
+// password is set and single sign-on is offered, the card shows the single sign-on button alone:
+// a password field could only answer that there is no password.
 import type { Client } from "@rcooler/http";
 import { isAbort } from "@rcooler/http";
 import { Button, Field, Input } from "@rcooler/react-ui";
@@ -98,6 +100,7 @@ export function SignInCard(props: SignInCardProps) {
   const [problem, setProblem] = useState<Problem | null>(null);
   const [ssoDown, setSsoDown] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [passwordSet, setPasswordSet] = useState(true);
   const passiveStarted = useRef(false);
 
   useEffect(() => clearFederationResult(), []);
@@ -109,6 +112,18 @@ export function SignInCard(props: SignInCardProps) {
     });
     return () => controller.abort();
   }, [api]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    // A failed answer keeps the password form, which then says what is wrong when used.
+    api.session(controller.signal).then(
+      (session) => setPasswordSet(session.loginConfigured),
+      () => undefined,
+    );
+    return () => controller.abort();
+  }, [api]);
+
+  const ssoOnly = !passwordSet && federation.enabled;
 
   const goToIssuer = useEffectEvent((url: string) => (props.navigate ?? assign)(url));
   const passiveWanted = (props.passiveCheck ?? true) && result === null;
@@ -215,7 +230,7 @@ export function SignInCard(props: SignInCardProps) {
               {labels.outageText}
             </Alert>
           )}
-          {props.account && (
+          {props.account && !ssoOnly && (
             <Field label={labels.login}>
               {(control) => (
                 <Input
@@ -231,37 +246,42 @@ export function SignInCard(props: SignInCardProps) {
               )}
             </Field>
           )}
-          <Field label={labels.password}>
-            {(control) => (
-              <div className="si-pw">
-                <Input
-                  {...control}
-                  type={passwordShown ? "text" : "password"}
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  autoComplete="current-password"
-                  required
-                  aria-invalid={problem === "wrong" || undefined}
-                />
-                <Button
-                  variant="ghost"
-                  square
-                  icon={passwordShown ? "eye-off" : "eye"}
-                  aria-label={passwordShown ? labels.hidePassword : labels.showPassword}
-                  aria-pressed={passwordShown}
-                  onClick={() => setPasswordShown((shown) => !shown)}
-                />
-              </div>
-            )}
-          </Field>
-          <Button type="submit" variant="primary" disabled={busy}>
-            {labels.submit}
-          </Button>
+          {!ssoOnly && (
+            <Field label={labels.password}>
+              {(control) => (
+                <div className="si-pw">
+                  <Input
+                    {...control}
+                    type={passwordShown ? "text" : "password"}
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    autoComplete="current-password"
+                    required
+                    aria-invalid={problem === "wrong" || undefined}
+                  />
+                  <Button
+                    variant="ghost"
+                    square
+                    icon={passwordShown ? "eye-off" : "eye"}
+                    aria-label={passwordShown ? labels.hidePassword : labels.showPassword}
+                    aria-pressed={passwordShown}
+                    onClick={() => setPasswordShown((shown) => !shown)}
+                  />
+                </div>
+              )}
+            </Field>
+          )}
+          {!ssoOnly && (
+            <Button type="submit" variant="primary" disabled={busy}>
+              {labels.submit}
+            </Button>
+          )}
           {federation.enabled && (
             <>
-              <div className="si-or">{labels.or}</div>
+              {!ssoOnly && <div className="si-or">{labels.or}</div>}
               <Button
                 className="si-sso"
+                {...(ssoOnly && { variant: "primary" as const })}
                 icon="shield-check"
                 disabled={busy || ssoDown}
                 onClick={() => void startSso()}

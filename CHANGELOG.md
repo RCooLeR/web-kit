@@ -5,6 +5,12 @@ change interfaces; such changes are listed here.
 
 ## Unreleased
 
+- `react-signin`: `SignInCard` shows the single sign-on button alone when `GET /session` says
+  `login_configured: false` and single sign-on is offered, as for an owner who has only single
+  sign-on right after the first sign-in claimed the account; without single sign-on the password
+  form stays. `SecurityPanel` explains the refusal `only_sign_in` (409 on unlinking an account
+  that has no password) with the new label `onlySignIn`, in English and Ukrainian; an app with
+  its own `SecurityLabels` adds it.
 - `react-ui`: a mark inside a card, such as the sign-in card's, takes `--mark-card` and
   `--mark-card-ink`, which default to `--mark` and `--mark-ink`. HomeLedger's light theme sets the
   deep teal there, so its logo no longer turns white on the white card.

@@ -175,6 +175,8 @@ export interface SecurityLabels {
   linkFailed: string;
   linkConflict: string;
   ssoOutage: string;
+  /** The account has no password, so its single sign-on link stays (`only_sign_in`). */
+  onlySignIn: string;
   retry: string;
 }
 
@@ -224,6 +226,8 @@ export const defaultSecurityLabels: SecurityLabels = {
   linkFailed: "The SSO account was not linked. Try again.",
   linkConflict: "This SSO account is already linked to another account here.",
   ssoOutage: "RCooLeR SSO is not answering. Try again later.",
+  onlySignIn:
+    "RCooLeR SSO is this account's only way to sign in, so it stays linked. Set a password first.",
   retry: "Try again",
 };
 
@@ -274,6 +278,8 @@ export const ukSecurityLabels: SecurityLabels = {
   linkFailed: "Обліковий запис SSO не пов’язано. Спробуйте ще раз.",
   linkConflict: "Цей обліковий запис SSO вже пов’язаний з іншим обліковим записом тут.",
   ssoOutage: "RCooLeR SSO зараз не відповідає. Спробуйте пізніше.",
+  onlySignIn:
+    "Цей обліковий запис входить лише через RCooLeR SSO, тож прив’язка лишається. Спершу задайте пароль.",
   retry: "Спробувати ще раз",
 };
 

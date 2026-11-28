@@ -132,6 +132,29 @@ describe("SignInCard", () => {
     expect(bodiesOf(calls, "POST /federation/start")).toEqual([{}]);
   });
 
+  it("offers only single sign-on when no password is set and the app has it", async () => {
+    const { client } = backend({
+      ...sso(),
+      "GET /session": () => json(200, { authenticated: false, login_configured: false, sso: true }),
+    });
+    render(<SignInCard client={client} brand={brand} onSignedIn={() => {}} />);
+    await screen.findByRole("button", { name: si.sso });
+    await waitFor(() => expect(screen.queryByLabelText(si.password)).toBeNull());
+    expect(screen.queryByRole("button", { name: si.submit })).toBeNull();
+    expect(screen.queryByText(si.or)).toBeNull();
+    cleanup();
+
+    // Without single sign-on the password form stays: it is the only way in it can say anything about.
+    const plain = backend({
+      ...noSso,
+      "GET /session": () =>
+        json(200, { authenticated: false, login_configured: false, sso: false }),
+    });
+    render(<SignInCard client={plain.client} brand={brand} onSignedIn={() => {}} />);
+    await waitFor(() => expect(plain.calls.map((call) => call.route)).toContain("GET /session"));
+    expect(screen.getByLabelText(si.password)).toBeTruthy();
+  });
+
   it("keeps the password working when the issuer does not answer", async () => {
     const { client } = backend({
       ...sso(),
@@ -369,6 +392,19 @@ describe("SecurityPanel", () => {
     fireEvent.click(screen.getByRole("button", { name: sec.unlink }));
     await screen.findByRole("button", { name: sec.link });
     expect(calls.map((call) => call.route)).toContain("DELETE /session/federation");
+  });
+
+  it("keeps the link of an account that has no other sign-in", async () => {
+    const { client } = backend({
+      "GET /session/authenticator": () => json(200, { enabled: false, available: false }),
+      "GET /session/federation": () =>
+        json(200, { enabled: true, linked: true, issuer: "https://sso.example.test/realms/team" }),
+      "DELETE /session/federation": () => refuse(409, "only_sign_in"),
+    });
+    render(<SecurityPanel client={client} appName="Herald" onSessionEnded={() => {}} />);
+    fireEvent.click(await screen.findByRole("button", { name: sec.unlink }));
+    expect((await screen.findByRole("alert")).textContent).toContain(sec.onlySignIn);
+    expect(screen.getByText(sec.linked)).toBeTruthy();
   });
 
   it("shows a link that went to another account, and hands back an ended session", async () => {
