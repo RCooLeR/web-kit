@@ -5,6 +5,8 @@ change interfaces; such changes are listed here.
 
 ## Unreleased
 
+## 0.2.0 (2026-11-28)
+
 - `react-signin`, new: the shared sign-in on one backend API. `SignInCard` asks for the password
   (and the login where an app has several accounts), then the authenticator code when the server
   answers `authenticator_required`, and offers single sign-on when `GET /federation` says it is
