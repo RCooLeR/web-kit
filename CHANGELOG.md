@@ -5,6 +5,14 @@ change interfaces; such changes are listed here.
 
 ## Unreleased
 
+## 0.1.1 (2026-11-28)
+
+- `react-admin`: `FormTableRow` takes `disabled`, which disables every control of a group row at
+  once, as while it saves.
+- `react-admin`: the menu link rules of `admin.css` are scoped under `.rc-admin-menu`, so an app's
+  global link colour does not win over them.
+- The other packages are unchanged; they are released again because the packages share one version.
+
 ## 0.1.0 (2026-11-28)
 
 - The packages publish to npmjs as public packages (`publishConfig`), and each carries its own

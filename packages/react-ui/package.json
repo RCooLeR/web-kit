@@ -1,6 +1,6 @@
 {
   "name": "@rcooler/react-ui",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "The shared look of the web apps: kit.css, the application shell, cards, chips, buttons, forms, tabs, row grids, icons, a modal with focus trap, toasts, a sortable table.",
   "license": "MIT",
   "type": "module",

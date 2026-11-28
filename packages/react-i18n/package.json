@@ -1,6 +1,6 @@
 {
   "name": "@rcooler/react-i18n",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "React provider and hook over @rcooler/i18n-core: the language of an app, switchable and remembered.",
   "license": "MIT",
   "type": "module",
@@ -35,6 +35,6 @@
     "typecheck": "node ../../node_modules/@typescript/native/bin/tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@rcooler/i18n-core": "0.1.0"
+    "@rcooler/i18n-core": "0.1.1"
   }
 }

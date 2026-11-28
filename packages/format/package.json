@@ -1,6 +1,6 @@
 {
   "name": "@rcooler/format",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Dates in Kyiv time, durations, numbers and UAH, USD and EUR money.",
   "license": "MIT",
   "type": "module",
