@@ -81,6 +81,14 @@ and back. Above 760 px the sidebar stays in view while the page scrolls, scrolls
 its entries are taller than the window, and keeps the sign-out and the switches at its bottom. Apps
 need nothing more than the props above.
 
+Optional parts: `scope` puts a control under the brand, such as a property selector (a `.btn` there
+is a full-width scope button); `account` shows the signed-in person at the foot of the sidebar, as a
+button (`onClick`) or a link (`href`), with `name`, `detail` (role, language) and `initials`;
+`countTone: "brand"` draws a count in the brand's main colour (`--pri`), for counts that are tasks
+rather than problems; and `phoneTabs` adds a tab bar at the bottom of the phone screen, with an
+optional last tab (`more`) that opens the navigation panel. The top bar and the panel stay as they
+are.
+
 Put `ToastProvider` and every `Modal` inside the shell: the tokens are defined on `.app`. The class
 names are those of the approved previews; a page may use them directly next to the components.
 Beyond the previews' shared stylesheet, `kit.css` has: `.ev` and `.mono` (code text), `.tr` (a grid

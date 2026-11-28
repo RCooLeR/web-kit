@@ -1,8 +1,10 @@
 // The application shell of the shared look: a sidebar with the brand, grouped navigation with
 // counters and a footer with the language and theme switches, and the page beside it. At phone
 // width (760 px and below) a top bar with the brand mark, the page's name and a menu button takes
-// the sidebar's place, and the sidebar opens from that button as a panel over the page. Above
-// that width the sidebar stays in view while the page scrolls.
+// the sidebar's place, and the sidebar opens from that button as a panel over the page; an app can
+// add a tab bar at the bottom of the phone screen. Above that width the sidebar stays in view while
+// the page scrolls. A scope control (such as a property selector) can sit under the brand, and the
+// signed-in account at the foot.
 import { Fragment, useEffect, useId, useRef, useState, type ReactNode } from "react";
 
 import { Icon, cx } from "./Icon.js";
@@ -18,8 +20,11 @@ export interface NavItem {
   current?: boolean;
   /** A count beside the label (open findings, apps that need setting up); hidden at zero. */
   count?: number;
-  /** "warn" shows the count in the warning colour; the default is the problem colour. */
-  countTone?: "bad" | "warn";
+  /**
+   * "warn" shows the count in the warning colour, "brand" in the brand's main colour (--pri), for
+   * counts that are tasks rather than problems; the default is the problem colour.
+   */
+  countTone?: "bad" | "warn" | "brand";
 }
 
 export interface NavGroup {
@@ -42,6 +47,26 @@ export interface SignOut {
   onSignOut: () => void;
 }
 
+/** The signed-in account at the foot of the sidebar: a button (onClick) or a link (href). */
+export interface Account {
+  name: ReactNode;
+  /** The line under the name, such as the role and the language. */
+  detail?: ReactNode;
+  /** One or two letters in the round badge. */
+  initials: string;
+  onClick?: () => void;
+  href?: string;
+}
+
+/** The phone tab bar: the main sections, and optionally a last tab that opens the menu. */
+export interface PhoneTabs {
+  /** Accessible name of the tab bar, such as "Головні розділи". */
+  label: string;
+  items: readonly NavItem[];
+  /** The text of a last tab that opens the navigation panel, such as "Ще". */
+  more?: ReactNode;
+}
+
 export interface AppShellProps {
   /** The application's name and what it is, beside its mark. */
   name: ReactNode;
@@ -60,6 +85,8 @@ export interface AppShellProps {
   /** Accessible name of the phone menu button and of the panel's close button; navLabel when omitted. */
   menuLabel?: string;
   nav: readonly NavGroup[];
+  /** A control under the brand, above the navigation, such as a property selector. */
+  scope?: ReactNode;
   /** A link to the cockpit above the navigation, when the app knows its address. */
   cockpit?: { href: string; label: ReactNode };
   /** The footer's left side: the version or commit. */
@@ -74,6 +101,10 @@ export interface AppShellProps {
   onThemeChange?: (theme: Theme) => void;
   /** A sign-out button at the foot of the sidebar, and so in the phone menu too. */
   signOut?: SignOut;
+  /** The signed-in account at the foot of the sidebar. */
+  account?: Account;
+  /** A tab bar at the bottom of the phone screen; the top bar and the menu stay. */
+  phoneTabs?: PhoneTabs;
   children: ReactNode;
 }
 
@@ -87,20 +118,25 @@ export function AppShell(props: AppShellProps) {
     if (props.onThemeChange) props.onThemeChange(next);
     if (props.theme === undefined) setOwnTheme(next);
   };
-  const { languages, signOut } = props;
+  const { languages, signOut, account, phoneTabs } = props;
 
   const navId = useId();
   const sideRef = useRef<HTMLElement>(null);
   const menuRef = useRef<HTMLButtonElement>(null);
+  const openerRef = useRef<HTMLButtonElement | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const closeMenu = () => setMenuOpen(false);
+  const openMenu = (opener: HTMLButtonElement) => {
+    openerRef.current = opener;
+    setMenuOpen(true);
+  };
   useFocusTrap(menuOpen, sideRef, closeMenu);
 
-  // The top bar is inert while the panel is open, so the trap may not find the menu button
-  // focused; focus goes back to it here.
+  // The top bar and the tab bar are inert while the panel is open, so the trap may not find the
+  // button that opened it focused; focus goes back to it here.
   useEffect(() => {
     if (!menuOpen) return undefined;
-    const button = menuRef.current;
+    const button = openerRef.current ?? menuRef.current;
     return () => button?.focus();
   }, [menuOpen]);
 
@@ -119,10 +155,19 @@ export function AppShell(props: AppShellProps) {
   const current = items.find((item) => item.current);
   const counted = items.filter((item) => item.count !== undefined && item.count > 0);
   const menuLabel = props.menuLabel ?? props.navLabel;
+  // The menu button's dot takes the strongest tone among the counts: problem, warning, brand.
+  const dotTone = counted.some((item) => item.countTone === undefined || item.countTone === "bad")
+    ? "bd"
+    : counted.some((item) => item.countTone === "warn")
+      ? undefined
+      : "br";
   const mark = props.mark ?? (props.icon ? <Icon name={props.icon} /> : null);
 
   return (
-    <div className={cx("app", theme === "light" && "light")} data-brand={props.brand}>
+    <div
+      className={cx("app", theme === "light" && "light", phoneTabs && "tabbed")}
+      data-brand={props.brand}
+    >
       <header className="topbar" inert={menuOpen}>
         <span className="mark">{mark}</span>
         <div className="grow ell bn">{current ? current.label : props.name}</div>
@@ -133,15 +178,10 @@ export function AppShell(props: AppShellProps) {
           aria-label={menuLabel}
           aria-expanded={menuOpen}
           aria-controls={navId}
-          onClick={() => setMenuOpen(true)}
+          onClick={(event) => openMenu(event.currentTarget)}
         >
           <Icon name="lines" />
-          {counted.length > 0 && (
-            <span
-              className={cx("mdot", counted.some((item) => item.countTone !== "warn") && "bd")}
-              aria-hidden="true"
-            />
-          )}
+          {counted.length > 0 && <span className={cx("mdot", dotTone)} aria-hidden="true" />}
         </button>
       </header>
       {menuOpen && <div className="scrim" aria-hidden="true" onClick={closeMenu} />}
@@ -168,6 +208,7 @@ export function AppShell(props: AppShellProps) {
             <Icon name="close" />
           </button>
         </div>
+        {props.scope !== undefined && <div className="sscope">{props.scope}</div>}
         {props.cockpit && (
           <a className="nav" href={props.cockpit.href} onClick={closeMenu}>
             <Icon name="cockpit" />
@@ -187,9 +228,7 @@ export function AppShell(props: AppShellProps) {
               >
                 <Icon name={item.icon} />
                 {item.label}
-                {item.count !== undefined && item.count > 0 && (
-                  <span className={cx("cnt", item.countTone === "warn" && "wr")}>{item.count}</span>
-                )}
+                <Count item={item} />
               </a>
             ))}
           </Fragment>
@@ -208,6 +247,7 @@ export function AppShell(props: AppShellProps) {
               {signOut.label}
             </button>
           )}
+          {account && <AccountBlock account={account} onChoose={closeMenu} />}
           <div className="foot">
             <span className="grow ell">{props.footer}</span>
             {languages && (
@@ -240,6 +280,81 @@ export function AppShell(props: AppShellProps) {
       <main className="main" inert={menuOpen}>
         {props.children}
       </main>
+      {phoneTabs && (
+        <nav className="tabbar" aria-label={phoneTabs.label} inert={menuOpen}>
+          {phoneTabs.items.map((item) => (
+            <a
+              key={item.href}
+              className={cx("ptab", item.current && "on")}
+              href={item.href}
+              aria-current={item.current ? "page" : undefined}
+            >
+              <Icon name={item.icon} />
+              {item.label}
+              <Count item={item} />
+            </a>
+          ))}
+          {phoneTabs.more !== undefined && (
+            <button
+              type="button"
+              className="ptab"
+              aria-expanded={menuOpen}
+              aria-controls={navId}
+              onClick={(event) => openMenu(event.currentTarget)}
+            >
+              <Icon name="more" />
+              {phoneTabs.more}
+            </button>
+          )}
+        </nav>
+      )}
     </div>
+  );
+}
+
+const countClass: Record<NonNullable<NavItem["countTone"]>, string | undefined> = {
+  bad: undefined,
+  warn: "wr",
+  brand: "br",
+};
+
+/** An entry's count, hidden at zero. */
+function Count({ item }: { item: NavItem }) {
+  if (item.count === undefined || item.count <= 0) return null;
+  return (
+    <span className={cx("cnt", item.countTone && countClass[item.countTone])}>{item.count}</span>
+  );
+}
+
+function AccountBlock({ account, onChoose }: { account: Account; onChoose: () => void }) {
+  const body = (
+    <>
+      <span className="av" aria-hidden="true">
+        {account.initials}
+      </span>
+      <span className="who">
+        <span className="b ell">{account.name}</span>
+        {account.detail !== undefined && <span className="mu ell">{account.detail}</span>}
+      </span>
+    </>
+  );
+  if (account.href !== undefined) {
+    return (
+      <a className="acct" href={account.href} onClick={onChoose}>
+        {body}
+      </a>
+    );
+  }
+  return (
+    <button
+      type="button"
+      className="acct"
+      onClick={() => {
+        onChoose();
+        account.onClick?.();
+      }}
+    >
+      {body}
+    </button>
   );
 }

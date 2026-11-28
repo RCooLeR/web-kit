@@ -3,7 +3,14 @@
 // Every text a component shows comes from the app, in its language.
 
 export { AppShell } from "./AppShell.js";
-export type { AppShellProps, LanguageSwitch, NavGroup, NavItem } from "./AppShell.js";
+export type {
+  Account,
+  AppShellProps,
+  LanguageSwitch,
+  NavGroup,
+  NavItem,
+  PhoneTabs,
+} from "./AppShell.js";
 export { Icon, IconBadge, cx, toneClass, toneColor } from "./Icon.js";
 export type { IconBadgeProps, IconProps, Tone } from "./Icon.js";
 export { iconNames, icons } from "./icons.js";

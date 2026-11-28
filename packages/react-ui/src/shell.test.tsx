@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -261,6 +261,107 @@ describe("AppShell at phone width", () => {
     cleanup();
     render(<Shell />);
     expect(screen.queryByRole("button", { name: "Вийти" })).toBeNull();
+  });
+});
+
+describe("AppShell slots", () => {
+  const base = {
+    name: "HomeLedger",
+    icon: "house",
+    navLabel: "Розділи",
+    themeLabel: "Світла тема",
+  } as const;
+  const ledger: NavGroup[] = [
+    {
+      items: [
+        { href: "#/", label: "Огляд", icon: "overview", current: true },
+        { href: "#/bills", label: "Рахунки", icon: "receipt", count: 4, countTone: "brand" },
+      ],
+    },
+  ];
+
+  it("puts a scope control under the brand, before the entries", () => {
+    render(
+      <AppShell {...base} nav={ledger} scope={<button className="btn">Усі об'єкти · 4</button>}>
+        <p>page</p>
+      </AppShell>,
+    );
+    const navigation = screen.getByRole("navigation", { name: "Розділи" });
+    const scope = screen.getByRole("button", { name: "Усі об'єкти · 4" });
+    expect(navigation.contains(scope)).toBe(true);
+    expect(scope.parentElement?.className).toBe("sscope");
+    expect(scope.parentElement?.previousElementSibling?.className).toBe("brand");
+    expect(scope.parentElement?.nextElementSibling?.className).toContain("nav");
+  });
+
+  it("shows the account at the foot of the sidebar as a button or a link", () => {
+    const onClick = vi.fn();
+    render(
+      <AppShell
+        {...base}
+        nav={ledger}
+        account={{ name: "Власник", detail: "Адміністратор · українська", initials: "В", onClick }}
+      >
+        <p>page</p>
+      </AppShell>,
+    );
+    const account = screen.getByRole("button", { name: /Власник/ });
+    expect(account.textContent).toContain("Адміністратор · українська");
+    expect(account.querySelector(".av")?.getAttribute("aria-hidden")).toBe("true");
+    expect(account.closest(".sfoot")).not.toBeNull();
+    fireEvent.click(account);
+    expect(onClick).toHaveBeenCalledTimes(1);
+    cleanup();
+    render(
+      <AppShell {...base} nav={ledger} account={{ name: "Власник", initials: "В", href: "#/me" }}>
+        <p>page</p>
+      </AppShell>,
+    );
+    expect(screen.getByRole("link", { name: /Власник/ }).getAttribute("href")).toBe("#/me");
+  });
+
+  it("draws a count in the brand's colour when asked", () => {
+    render(
+      <AppShell {...base} nav={ledger}>
+        <p>page</p>
+      </AppShell>,
+    );
+    const navigation = screen.getByRole("navigation", { name: "Розділи" });
+    expect(navigation.querySelector(".cnt")?.className).toBe("cnt br");
+    expect(document.querySelector(".topbar .mdot")?.className).toBe("mdot br");
+  });
+
+  it("adds a phone tab bar whose last tab can open the menu", () => {
+    render(
+      <AppShell
+        {...base}
+        nav={ledger}
+        phoneTabs={{
+          label: "Головні розділи",
+          items: [
+            { href: "#/", label: "Огляд", icon: "overview", current: true },
+            { href: "#/bills", label: "Рахунки", icon: "receipt", count: 4, countTone: "brand" },
+          ],
+          more: "Ще",
+        }}
+      >
+        <p>page</p>
+      </AppShell>,
+    );
+    expect(document.querySelector(".app")?.classList.contains("tabbed")).toBe(true);
+    const bar = screen.getByRole("navigation", { name: "Головні розділи" });
+    const current = within(bar).getByRole("link", { name: "Огляд", current: "page" });
+    expect(bar.contains(current)).toBe(true);
+    expect(bar.querySelector(".ptab .cnt.br")?.textContent).toBe("4");
+    const more = screen.getByRole("button", { name: "Ще" });
+    const navigation = screen.getByRole("navigation", { name: "Розділи" });
+    expect(more.getAttribute("aria-controls")).toBe(navigation.id);
+    fireEvent.click(more);
+    expect(navigation.classList.contains("open")).toBe(true);
+    expect(bar.hasAttribute("inert")).toBe(true);
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(navigation.classList.contains("open")).toBe(false);
+    expect(document.activeElement).toBe(more);
   });
 });
 

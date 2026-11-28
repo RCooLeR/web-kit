@@ -14,6 +14,10 @@ change interfaces; such changes are listed here.
   `readFederationResult` and `clearFederationResult` the callback's `?signin=` and `?link=` values.
   English and Ukrainian texts; `signin.css` (exported as `@rcooler/react-signin/signin.css`).
 - `react-ui`: icons `eye`, `link`, `unlink`, `copy`, `shield-check` and `cloud-off`.
+- `react-ui`: `AppShell` takes `scope` (a control under the brand, such as a property selector),
+  `account` (the signed-in person at the foot of the sidebar) and `phoneTabs` (a tab bar at the
+  bottom of the phone screen, with a last tab that can open the menu), and a nav count can take
+  `countTone: "brand"`, drawn in the brand's main colour.
 
 ## 0.1.0 (2026-11-28)
 
