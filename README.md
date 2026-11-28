@@ -2,7 +2,7 @@
 
 Small TypeScript packages for web apps written in Ukrainian and English: a Bootstrap 5 theme,
 formatting, translations, an HTTP client, Web Push, and a few React components. They are built as
-ESM with type declarations, to be published under the `@rcooler` scope.
+ESM with type declarations and published on npm under the `@rcooler` scope.
 
 The packages are extracted from working apps when a second app needs the same code, not designed
 up front. The first consumer is Herald, a notification service. The Go counterpart is
@@ -159,8 +159,17 @@ Texts come from the app; the English defaults (`defaultListTableLabels`, `defaul
 
 ## Using the packages
 
-The packages are not on a registry yet. Until they are, an app links them from a checkout of this
-repository next to its own and builds them first:
+The packages are on npm under the `@rcooler` scope, with one shared version:
+
+```sh
+npm install @rcooler/format @rcooler/react-ui
+```
+
+They pin each other exactly (`@rcooler/react-admin` on `@rcooler/react-ui`, `@rcooler/react-i18n`
+on `@rcooler/i18n-core`), so an app keeps all of them on the same version.
+
+To try a change that is not released yet, link a package from a checkout of this repository next
+to the app and build it first:
 
 ```sh
 git clone https://github.com/RCooLeR/web-kit.git
@@ -171,15 +180,10 @@ git clone https://github.com/RCooLeR/web-kit.git
 "@rcooler/format": "file:../web-kit/packages/format"
 ```
 
-The path is relative to the app's `package.json`: an app whose frontend lives in `web/` next to a
-`web-kit` checkout beside the project writes `file:../../web-kit/packages/format`. The build writes
-each package's `dist/`, which its `exports` point at, and `@rcooler/tokens/tokens.css` exists only
-after it.
-
-An app that links the React packages this way must make its bundler use one copy of React and of
-the shared packages, because the links resolve into this workspace's own `node_modules`. An app that
-dedupes `@rcooler/i18n-core` links it as its own dependency too. With Vite, which also has to be
-allowed to serve the checkout in development:
+The path is relative to the app's `package.json`. An app that links the React packages this way
+must make its bundler use one copy of React and of the shared packages, because the links resolve
+into this workspace's own `node_modules`; an app that dedupes `@rcooler/i18n-core` links it as its
+own dependency too. With Vite, which also has to be allowed to serve the checkout in development:
 
 ```ts
 resolve: { dedupe: ["react", "react-dom", "@rcooler/i18n-core"] },
@@ -203,8 +207,8 @@ tap.
 
 | Tool | Version | Notes |
 |---|---|---|
-| Node.js | 24 LTS, exact version in `.nvmrc` | `engines` and `engine-strict` refuse other lines |
-| npm | 11, the one Node 24 ships | |
+| Node.js | 26 LTS, exact version in `.nvmrc` | `engines` and `engine-strict` refuse other lines |
+| npm | 11, the one Node 26 ships | |
 | TypeScript | 7 (`@typescript/native`) builds and type-checks; 6 is installed as `typescript` | typescript-eslint needs TypeScript 6, and `check:consumers` compiles a consumer with TypeScript 6 against the built declarations |
 | Tests | vitest, jsdom for the React packages | the test process runs in `America/New_York`, so a formatter that leaks the machine's zone fails |
 

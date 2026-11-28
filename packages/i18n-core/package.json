@@ -24,7 +24,8 @@
     "directory": "packages/i18n-core"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
   },
   "scripts": {
     "build": "node ../../node_modules/@typescript/native/bin/tsc -p tsconfig.build.json",

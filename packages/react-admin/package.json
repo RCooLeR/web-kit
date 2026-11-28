@@ -27,7 +27,8 @@
     "directory": "packages/react-admin"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
   },
   "peerDependencies": {
     "react": "^19.3.1"

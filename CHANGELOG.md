@@ -5,6 +5,20 @@ change interfaces; such changes are listed here.
 
 ## Unreleased
 
+## 0.1.0 (2026-11-28)
+
+- The packages publish to npmjs as public packages (`publishConfig`), and each carries its own
+  `README.md` and `LICENSE`.
+- Development moves to Node.js 26 LTS (26.13.1 in `.nvmrc`) with npm 11.20. The packages still
+  install on Node.js 24 and later.
+
+- `react-ui`: brand theming. kit.css takes fonts, corners, the main button, the mark and the
+  sidebar and phone top bar from tokens on `.app` (`--font`, `--font-display`, `--r-card`,
+  `--r-ctl`, `--pri`, `--pri-ink`, `--mark`, `--mark-ink`, `--side*`) whose defaults are today's
+  look. `@rcooler/react-ui/brands/homeledger.css` sets HomeLedger's tokens, dark and light.
+  `AppShell` takes `brand` (set as `data-brand` on `.app`) and `mark` (the brand's own logo instead
+  of an icon); `icon` is optional when `mark` is given.
+
 - `react-admin`, new: admin screen patterns in the familiar publishing-dashboard layout.
   `AdminLayout` (top bar, menu, phone panel with a focus trap), `AdminMenu` (sections with
   submenus, flyouts on hover and focus, folded to icons, counts), `ScreenHeader` with a page
@@ -13,13 +27,6 @@ change interfaces; such changes are listed here.
   `usePostBoxLayout`, `FormTable`, `FormTableRow` and `FormActions`, `ScreenOptions` and `NavTabs`
   (the react-ui `Tabs` in the admin look). `admin.css` (exported as `@rcooler/react-admin/admin.css`)
   styles them through `--rc-admin-*` custom properties.
-
-- `react-ui`: brand theming. kit.css takes fonts, corners, the main button, the mark and the
-  sidebar and phone top bar from tokens on `.app` (`--font`, `--font-display`, `--r-card`,
-  `--r-ctl`, `--pri`, `--pri-ink`, `--mark`, `--mark-ink`, `--side*`) whose defaults are today's
-  look. `@rcooler/react-ui/brands/homeledger.css` sets HomeLedger's tokens, dark and light.
-  `AppShell` takes `brand` (set as `data-brand` on `.app`) and `mark` (the brand's own logo instead
-  of an icon); `icon` is optional when `mark` is given.
 
 The packages were first developed inside [kit](https://github.com/RCooLeR/kit) and moved here before
 either repository was published. Their code is unchanged.

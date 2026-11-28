@@ -24,7 +24,8 @@
     "directory": "packages/react-i18n"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
   },
   "peerDependencies": {
     "react": "^19.3.1"
