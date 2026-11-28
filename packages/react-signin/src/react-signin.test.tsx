@@ -233,6 +233,42 @@ describe("SecurityPanel", () => {
     expect(bodiesOf(calls, "POST /session/authenticator/setup")).toEqual([{}]);
   });
 
+  it("stays signed in after turning the authenticator on where the app keeps the session", async () => {
+    const { client, calls } = backend({
+      "GET /session/authenticator": (_b, call) => json(200, { enabled: call > 0, available: true }),
+      "POST /session/authenticator/setup": () => json(200, setupAnswer),
+      "POST /session/authenticator": () => json(204),
+      "GET /session": () => json(200, { authenticated: true, login_configured: true, sso: false }),
+    });
+    const onSessionEnded = vi.fn();
+    render(<SecurityPanel client={client} appName="Herald" onSessionEnded={onSessionEnded} />);
+    fireEvent.click(await screen.findByRole("button", { name: sec.turnOn }));
+    await screen.findByText("JBSW Y3DP EHPK 3PXP");
+    typeIn(sec.password, "a password");
+    typeIn(sec.code, "123456");
+    fireEvent.click(screen.getByRole("button", { name: sec.turnOn }));
+    await screen.findByText(sec.stateOn);
+    expect(screen.queryByText("JBSW Y3DP EHPK 3PXP")).toBeNull();
+    expect(onSessionEnded).not.toHaveBeenCalled();
+    expect(calls.map((call) => call.route)).toContain("GET /session");
+  });
+
+  it("shows the state as it is when the authenticator was already off", async () => {
+    const { client, calls } = backend({
+      "GET /session/authenticator": (_b, call) =>
+        json(200, { enabled: call === 0, available: true }),
+      "DELETE /session/authenticator": () => refuse(409, "authenticator_off"),
+    });
+    render(<SecurityPanel client={client} appName="Herald" onSessionEnded={() => {}} />);
+    await screen.findByText(sec.stateOn);
+    typeIn(sec.password, "a password");
+    typeIn(sec.code, "654321");
+    fireEvent.click(screen.getByRole("button", { name: sec.turnOff }));
+    await screen.findByRole("button", { name: sec.turnOn });
+    expect(screen.queryByRole("alert")).toBeNull();
+    expect(calls.filter((call) => call.route === "GET /session/authenticator")).toHaveLength(2);
+  });
+
   it("answers a wrong password, a code that does not fit and an expired setup", async () => {
     const answers = [
       refuse(401, "invalid_login"),

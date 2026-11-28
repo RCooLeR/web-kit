@@ -38,8 +38,9 @@ export interface SecurityPanelProps {
   /** The language of dates; the browser's when omitted. */
   locale?: string;
   /**
-   * The session is gone: turning the authenticator on ends every session, this one too, and a
-   * call can find the session expired. Show the sign-in card.
+   * The session is gone: turning the authenticator on can end every session, this one too (the
+   * panel asks GET /session after it), and a call can find the session expired. Show the sign-in
+   * card.
    */
   onSessionEnded: (reason: "authenticator_on" | "signed_out") => void;
   /** Sends the browser to the issuer; `location.assign` by default. */
@@ -227,7 +228,11 @@ function AuthenticatorSection({
       const found = failureOf(code);
       if (found === "session") {
         onSessionEnded("signed_out");
-      } else if (code === "authenticator_on" || code === "bad_request") {
+      } else if (
+        code === "authenticator_on" ||
+        code === "authenticator_off" ||
+        code === "bad_request"
+      ) {
         // Changed elsewhere (another tab, an operator command): show the state as it is now.
         reset();
         onChanged();
@@ -250,7 +255,14 @@ function AuthenticatorSection({
     if (!setup) return;
     void change(async () => {
       await api.enableAuthenticator({ password, setupToken: setup.setupToken, code });
-      onSessionEnded("authenticator_on");
+      // Apps differ: some end every session, some keep this one. Ask which happened.
+      const session = await api.session().catch(() => null);
+      if (session?.authenticated) {
+        reset();
+        onChanged();
+      } else {
+        onSessionEnded("authenticator_on");
+      }
     });
   }
 

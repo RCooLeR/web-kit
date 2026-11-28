@@ -194,7 +194,7 @@ routes the same way; errors are kit `jsonhttp` envelopes, and the components rea
 | `GET /federation/callback` | the issuer's return | 303 to the public address, plain on success or with `?signin=failed`, `local`, `authenticator`, `?link=done`, `failed`, `conflict` |
 | `GET /session/authenticator` | | `{enabled, available}` |
 | `POST /session/authenticator/setup` | `{}` | `{secret, uri, setup_token}`; 409 `authenticator_on`, 503 `authenticator_unavailable` |
-| `POST /session/authenticator` | `{password, setup_token, code}` | 204, and every session ends, this one too; 409 `setup_expired` |
+| `POST /session/authenticator` | `{password, setup_token, code}` | 204; the app may end every session, this one too, so the panel asks `GET /session` after it; 409 `setup_expired` |
 | `DELETE /session/authenticator` | `{password, code}` | 204 |
 | `GET /session/federation` | | `{enabled, linked, issuer?, linked_at?, by?}`; 404 counts as not offered |
 | `DELETE /session/federation` | | `{unlinked}` |
