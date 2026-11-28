@@ -400,6 +400,6 @@ describe("parts", () => {
 
   it("names every icon once", () => {
     expect(new Set(iconNames).size).toBe(iconNames.length);
-    expect(iconNames.length).toBe(71);
+    expect(iconNames.length).toBe(77);
   });
 });

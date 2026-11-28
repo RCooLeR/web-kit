@@ -17,6 +17,7 @@
     "packages/webpush",
     "packages/react-ui",
     "packages/react-admin",
+    "packages/react-signin",
     "packages/react-i18n"
   ],
   "scripts": {

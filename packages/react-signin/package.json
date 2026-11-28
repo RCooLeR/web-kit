@@ -1,0 +1,45 @@
+{
+  "name": "@rcooler/react-signin",
+  "version": "0.1.0",
+  "description": "The shared sign-in: a sign-in card with password, authenticator code and single sign-on, and a sign-in security panel, on one backend API.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": [
+    "*.css"
+  ],
+  "exports": {
+    ".": {
+      "@rcooler/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./signin.css": "./dist/signin.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RCooLeR/web-kit.git",
+    "directory": "packages/react-signin"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "peerDependencies": {
+    "react": "^19.3.1"
+  },
+  "scripts": {
+    "build": "node ../../node_modules/@typescript/native/bin/tsc -p tsconfig.build.json && node scripts/copy-assets.mjs",
+    "typecheck": "node ../../node_modules/@typescript/native/bin/tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@rcooler/http": "0.1.0",
+    "@rcooler/react-ui": "0.1.0",
+    "uqr": "0.1.3"
+  }
+}

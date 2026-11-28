@@ -83,6 +83,18 @@ export const icons = {
   edit: ["M4 20h4l10-10-4-4L4 16zM13 7l4 4"],
   "arrow-up-right": ["M7 17L17 7M9 7h8v8"],
   "arrow-down-left": ["M17 7L7 17M15 17H7V9"],
+  eye: ["M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"],
+  link: [
+    "M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1",
+  ],
+  unlink: [
+    "M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1M4 4l16 16",
+  ],
+  copy: ["M9 9h11v11H9zM5 15H4V4h11v1"],
+  "shield-check": ["M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z", "M9 12l2 2 4-4"],
+  "cloud-off": [
+    "M3 3l18 18M8.5 8.6A5 5 0 0 0 7 18h10.5M18.6 15.4A3.5 3.5 0 0 0 16 9.1 6 6 0 0 0 11 6.1",
+  ],
 } as const satisfies Record<string, readonly string[]>;
 
 /** The name of an icon of the set. */

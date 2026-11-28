@@ -22,6 +22,7 @@ promise yet. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 | `@rcooler/webpush` | Subscribe, resubscribe after a server key change, and the service worker handlers (`@rcooler/webpush/worker`): show the message with its buttons, open the page, hand an answer button's token to the app | none |
 | `@rcooler/react-ui` | The shared look: `kit.css` (tokens, dark by default), `AppShell` (sidebar, grouped navigation with counters, language and theme switches, optional cockpit link and sign-out; a top bar with a menu panel at phone width), the parts (`Card`, `Stat`, `Chip`, `Button`, `Row`, `Progress`, `Field`, `Segmented`, `CheckLine`, `MasterDetail`, `Tabs`, `Plate`, `RowGrid`), the icon set, `Modal` with a focus trap, toasts, a sortable `DataTable`, `ErrorBoundary` | React 19.3 (peer) |
 | `@rcooler/react-admin` | Admin screens in the familiar publishing-dashboard layout: `AdminLayout` (top bar, menu, phone panel), `AdminMenu` (sections with submenus, flyouts, folded), `ScreenHeader` with a page action, `Notice`, `ListTable` with `ListViews`, `ListSearch`, `BulkActions`, `Pagination` and `useListSelection`, `PostBox` and `PostBoxes` with `usePostBoxLayout`, `FormTable`, `ScreenOptions`, `NavTabs`; `admin.css` | React 19.3 (peer), `@rcooler/react-ui` |
+| `@rcooler/react-signin` | The shared sign-in on one backend API: `SignInCard` (password, authenticator code, single sign-on with a passive check), `SecurityPanel` (authenticator app with a QR code, the single sign-on link), `createSignInApi`, the callback's result, English and Ukrainian texts; `signin.css` | React 19.3 (peer), `@rcooler/react-ui`, `@rcooler/http`, `uqr` |
 | `@rcooler/react-i18n` | `createI18n(dictionaries)`: a provider and a hook that give components the translator and a language switch | React 19.3 (peer), `@rcooler/i18n-core` |
 
 Nothing reads the machine's time zone or language implicitly: the zone, the locale and "now" are
@@ -156,6 +157,57 @@ icons, and at 760 px and below it opens from the top bar as a panel with every s
 table at phone width keeps its primary column and a button per row that shows the other columns.
 Texts come from the app; the English defaults (`defaultListTableLabels`, `defaultPaginationLabels`,
 `defaultPostBoxLabels` and the `label` props) are there for tests and prototypes.
+
+## Sign-in
+
+`@rcooler/react-signin` is the sign-in of every app: one card, one security panel, one API. Load
+`@rcooler/react-signin/signin.css` after kit.css; a brand stylesheet restyles it like the rest.
+
+```tsx
+import "@rcooler/react-signin/signin.css";
+import {
+  SecurityPanel, SignInCard, readFederationResult, skipPassiveCheck,
+  ukSecurityLabels, ukSignInLabels,
+} from "@rcooler/react-signin";
+
+const result = readFederationResult(location.search); // where the SSO callback landed
+
+<div className="app si-page" data-brand="homeledger">
+  <SignInCard client={client} brand={<Brand />} account labels={ukSignInLabels}
+    controls={<LanguageAndTheme />} notice={notice} onSignedIn={refreshSession} />
+</div>
+
+<SecurityPanel client={client} appName="Herald" intro={t("security.intro")}
+  labels={ukSecurityLabels} linkResult={result && "link" in result ? result.link : null}
+  onSessionEnded={(reason) => showSignIn(reason === "authenticator_on" ? "authenticator_on" : undefined)} />
+```
+
+`client` is the app's `@rcooler/http` client with the base URL `/api/v1`. Every app answers these
+routes the same way; errors are kit `jsonhttp` envelopes, and the components read only their code:
+
+| Route | Request | Answer |
+|---|---|---|
+| `GET /session` | | `{authenticated, login_configured, sso}`; `sso` means single sign-on is configured |
+| `POST /session` | `{password, code?}`, plus `login` in apps with several accounts | 200; 401 `authenticator_required` (send the code too), `invalid_code` or `invalid_login`; 429 `too_many_attempts` |
+| `GET /federation` | | `{enabled, passive, social_providers}`; 404 counts as not offered |
+| `POST /federation/start` | `{}`, `{passive: true}` or `{link: true}` (`provider` names a social sign-in) | `{authorization_url}`; 503 `federation_unavailable`, 404 `federation_disabled` |
+| `GET /federation/callback` | the issuer's return | 303 to the public address, plain on success or with `?signin=failed`, `local`, `authenticator`, `?link=done`, `failed`, `conflict` |
+| `GET /session/authenticator` | | `{enabled, available}` |
+| `POST /session/authenticator/setup` | `{}` | `{secret, uri, setup_token}`; 409 `authenticator_on`, 503 `authenticator_unavailable` |
+| `POST /session/authenticator` | `{password, setup_token, code}` | 204, and every session ends, this one too; 409 `setup_expired` |
+| `DELETE /session/authenticator` | `{password, code}` | 204 |
+| `GET /session/federation` | | `{enabled, linked, issuer?, linked_at?, by?}`; 404 counts as not offered |
+| `DELETE /session/federation` | | `{unlinked}` |
+
+The card shows the single sign-on button only when `GET /federation` says `enabled`, so an app
+without it (404) gets the same card with password and code alone. When the issuer allows it, the
+card asks the issuer's session passively once per tab; call `skipPassiveCheck()` on sign-out, or the
+person is signed straight back in. `account` adds the login field. The callback lands on the
+public address: `readFederationResult` tells the app which screen to show (a `link` result belongs
+on the security screen), and the components take the value out of the address once shown. There
+are no recovery codes: an administrator turns a lost authenticator off, which `resetHint` says in
+each app's words. Texts: `defaultSignInLabels` and `defaultSecurityLabels` (English),
+`ukSignInLabels` and `ukSecurityLabels`; change one by spreading.
 
 ## Using the packages
 

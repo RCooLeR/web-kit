@@ -5,6 +5,16 @@ change interfaces; such changes are listed here.
 
 ## Unreleased
 
+- `react-signin`, new: the shared sign-in on one backend API. `SignInCard` asks for the password
+  (and the login where an app has several accounts), then the authenticator code when the server
+  answers `authenticator_required`, and offers single sign-on when `GET /federation` says it is
+  enabled, with a passive check once per tab (`skipPassiveCheck`). `SecurityPanel` turns an
+  authenticator app on (QR code, key, password and a first code) and off (password and a current
+  code), and links or unlinks the single sign-on account. `createSignInApi` holds the calls,
+  `readFederationResult` and `clearFederationResult` the callback's `?signin=` and `?link=` values.
+  English and Ukrainian texts; `signin.css` (exported as `@rcooler/react-signin/signin.css`).
+- `react-ui`: icons `eye`, `link`, `unlink`, `copy`, `shield-check` and `cloud-off`.
+
 ## 0.1.0 (2026-11-28)
 
 - The packages publish to npmjs as public packages (`publishConfig`), and each carries its own

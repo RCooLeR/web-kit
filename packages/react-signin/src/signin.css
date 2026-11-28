@@ -1,0 +1,198 @@
+/* @rcooler/react-signin: the sign-in card and the sign-in security panel. Built from kit.css parts
+   and tokens, so a brand stylesheet restyles them too. Load it after @rcooler/react-ui/kit.css. */
+
+/* The sign-in screen: the card centred on the page, under .app. */
+.app.si-page {
+  min-height: 100dvh;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+}
+.si {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 28px;
+}
+.si .brand {
+  padding: 0;
+}
+.si-form {
+  gap: 16px;
+}
+.si-pw {
+  display: flex;
+  gap: 8px;
+}
+.si-pw .in {
+  flex: 1;
+  min-width: 0;
+}
+.in.si-code {
+  font-size: 24px;
+  letter-spacing: 0.45em;
+  text-align: center;
+  font-weight: 600;
+}
+.si-or {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--mu);
+  font-size: 13px;
+}
+.si-or::before,
+.si-or::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--ln);
+}
+.btn.si-sso {
+  width: 100%;
+}
+.btn.si-sso .i {
+  color: var(--ac);
+}
+.btn.si-back {
+  align-self: flex-start;
+  padding: 0 12px 0 6px;
+  color: var(--mu);
+}
+.si-al {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  border-radius: var(--r-card);
+  padding: 12px 14px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+.si-al > .i {
+  flex: none;
+  margin-top: 1px;
+}
+.si-al.bd {
+  background: var(--bd-bg);
+}
+.si-al.bd > .i,
+.si-al.bd .b {
+  color: var(--bd);
+}
+.si-al.wr {
+  background: var(--wr-bg);
+}
+.si-al.wr > .i,
+.si-al.wr .b {
+  color: var(--wr);
+}
+.si-al.ok {
+  background: var(--ok-bg);
+}
+.si-al.ok > .i,
+.si-al.ok .b {
+  color: var(--ok);
+}
+.si-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-top: 1px solid var(--ln);
+  padding-top: 14px;
+  font-size: 13px;
+  color: var(--mu);
+}
+
+/* The sign-in security panel. */
+.sec {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 760px;
+}
+.sec .btn.sec-start,
+.sec .btn.sec-retry {
+  align-self: flex-start;
+}
+.sec .si-al .btn.sec-retry {
+  margin-top: 10px;
+}
+.sec-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.sec-steps li {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--ln);
+}
+.sec-qrrow {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.sec-qr {
+  background: #ffffff;
+  border-radius: var(--r-card);
+  padding: 6px;
+  flex: none;
+  line-height: 0;
+}
+.sec-manual {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1 1 220px;
+  min-width: 0;
+}
+.sec-manual .btn {
+  align-self: flex-start;
+}
+.sec-key {
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  background: var(--sf2);
+  border-radius: var(--r-ctl);
+  padding: 10px 12px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.sec-fields {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.sec-fields .fld {
+  flex: 1 1 200px;
+}
+.sec-fields .in.si-code {
+  max-width: 220px;
+}
+.sec-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.sec .kvr.sec-first {
+  border-top: 0;
+}
+@media (max-width: 560px) {
+  .si {
+    padding: 22px 18px;
+  }
+  .sec-fields .in.si-code {
+    max-width: none;
+  }
+}

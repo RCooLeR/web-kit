@@ -18,6 +18,13 @@ import {
   type ListTableProps,
 } from "@rcooler/react-admin";
 import {
+  createSignInApi,
+  readFederationResult,
+  ukSignInLabels,
+  type SecurityPanelProps,
+  type SignInCardProps,
+} from "@rcooler/react-signin";
+import {
   iconNames,
   readTheme,
   sortRows,
@@ -101,3 +108,17 @@ export const listTable: Pick<ListTableProps<{ title: string }>, "columns" | "lab
   columns: listColumns,
   label: menu[0]?.key ?? defaultPaginationLabels.items(0),
 };
+
+export const signIn: Pick<SignInCardProps, "client" | "labels" | "account"> = {
+  client,
+  labels: { ...ukSignInLabels, footNote: "" },
+  account: true,
+};
+export const security: Pick<SecurityPanelProps, "appName" | "linkResult"> = {
+  appName: "App",
+  linkResult: (() => {
+    const result = readFederationResult("?link=done");
+    return result !== null && "link" in result ? result.link : null;
+  })(),
+};
+export const federation = createSignInApi(client).federation();
