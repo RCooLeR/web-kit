@@ -5,6 +5,13 @@ change interfaces; such changes are listed here.
 
 ## Unreleased
 
+- `react-ui`: brand theming. kit.css takes fonts, corners, the main button, the mark and the
+  sidebar and phone top bar from tokens on `.app` (`--font`, `--font-display`, `--r-card`,
+  `--r-ctl`, `--pri`, `--pri-ink`, `--mark`, `--mark-ink`, `--side*`) whose defaults are today's
+  look. `@rcooler/react-ui/brands/homeledger.css` sets HomeLedger's tokens, dark and light.
+  `AppShell` takes `brand` (set as `data-brand` on `.app`) and `mark` (the brand's own logo instead
+  of an icon); `icon` is optional when `mark` is given.
+
 The packages were first developed inside [kit](https://github.com/RCooLeR/kit) and moved here before
 either repository was published. Their code is unchanged.
 

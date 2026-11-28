@@ -20,9 +20,28 @@
   --bd: #ff9189;
   --bd-bg: rgba(255, 145, 137, 0.15);
   --or: #f2a65a;
+  /* Brand tokens. A brand stylesheet (brands/) sets them on .app[data-brand]; the defaults are the
+     rcooler look and follow the theme tokens above. */
+  --font: Inter, system-ui, sans-serif;
+  --font-display: Manrope, Inter, sans-serif;
+  --r-card: 18px;
+  --r-ctl: 12px;
+  --pri: var(--ac);
+  --pri-ink: var(--ac-ink);
+  --mark: var(--ac);
+  --mark-ink: var(--ac-ink);
+  /* The sidebar, and the top bar that replaces it at phone width. */
+  --side: var(--sf);
+  --side-ink: var(--tx);
+  --side-mu: var(--mu);
+  --side-dim: var(--mu);
+  --side-ln: var(--ln);
+  --side-hover: var(--sf2);
+  --side-on: var(--ac-bg);
+  --side-on-ink: var(--ac);
   background: var(--bg);
   color: var(--tx);
-  font-family: Inter, system-ui, sans-serif;
+  font-family: var(--font);
   font-size: 15px;
   line-height: 1.4;
   display: flex;
@@ -70,8 +89,9 @@ body {
 }
 .side {
   flex: 0 0 236px;
-  background: var(--sf);
-  border-right: 1px solid var(--ln);
+  background: var(--side);
+  color: var(--side-ink);
+  border-right: 1px solid var(--side-ln);
   padding: 20px 12px;
   display: flex;
   flex-direction: column;
@@ -95,15 +115,15 @@ body {
   width: 40px;
   height: 40px;
   border-radius: 12px;
-  background: var(--ac);
-  color: var(--ac-ink);
+  background: var(--mark);
+  color: var(--mark-ink);
   display: flex;
   align-items: center;
   justify-content: center;
   flex: none;
 }
 .bn {
-  font-family: Manrope, Inter, sans-serif;
+  font-family: var(--font-display);
   font-weight: 700;
   font-size: 17px;
   line-height: 1.2;
@@ -113,7 +133,7 @@ body {
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--mu);
+  color: var(--side-dim);
   padding: 14px 12px 6px;
 }
 .app a.nav,
@@ -123,13 +143,13 @@ body {
   gap: 12px;
   min-height: 44px;
   padding: 0 12px;
-  border-radius: 12px;
-  color: var(--mu);
+  border-radius: var(--r-ctl);
+  color: var(--side-mu);
   font-weight: 500;
 }
 .app a.nav:hover,
 .app button.nav:hover {
-  background: var(--sf2);
+  background: var(--side-hover);
   text-decoration: none;
 }
 .app button.nav {
@@ -142,8 +162,8 @@ body {
   cursor: pointer;
 }
 .app a.nav.on {
-  background: var(--ac-bg);
-  color: var(--ac);
+  background: var(--side-on);
+  color: var(--side-on-ink);
 }
 .cnt {
   margin-left: auto;
@@ -169,8 +189,17 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--mu);
+  color: var(--side-dim);
   font-size: 13px;
+}
+/* Text and buttons on the sidebar and the phone top bar follow its tokens. */
+.side .mu {
+  color: var(--side-dim);
+}
+.side .btn,
+.topbar .btn {
+  color: var(--side-ink);
+  border-color: var(--side-ln);
 }
 
 /* Icons, headings and text. */
@@ -217,7 +246,7 @@ body {
   color: var(--bd);
 }
 .h1 {
-  font-family: Manrope, Inter, sans-serif;
+  font-family: var(--font-display);
   font-size: 26px;
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -246,12 +275,12 @@ body {
 .card {
   background: var(--sf);
   border: 1px solid var(--ln);
-  border-radius: 18px;
+  border-radius: var(--r-card);
   padding: 18px 20px;
   min-width: 0;
 }
 .kv {
-  font-family: Manrope, Inter, sans-serif;
+  font-family: var(--font-display);
   font-size: 30px;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -322,7 +351,7 @@ body {
   gap: 8px;
   min-height: 44px;
   padding: 0 16px;
-  border-radius: 12px;
+  border-radius: var(--r-ctl);
   border: 1px solid var(--ln);
   background: var(--sf2);
   color: var(--tx);
@@ -331,8 +360,8 @@ body {
   white-space: nowrap;
 }
 .btn.pri {
-  background: var(--ac);
-  color: var(--ac-ink);
+  background: var(--pri);
+  color: var(--pri-ink);
   border-color: transparent;
 }
 .btn.gh {
@@ -375,7 +404,7 @@ body {
 }
 .in {
   min-height: 44px;
-  border-radius: 12px;
+  border-radius: var(--r-ctl);
   border: 1px solid var(--ln);
   background: var(--bg);
   color: var(--tx);
@@ -620,6 +649,11 @@ button.dr.on:hover,
   color: var(--ac);
   border-color: var(--ac);
 }
+.side .btn.on {
+  background: var(--side-on);
+  color: var(--side-on-ink);
+  border-color: var(--side-on-ink);
+}
 .btn.bd {
   background: var(--bd-bg);
   color: var(--bd);
@@ -829,7 +863,7 @@ textarea.in {
   height: 9px;
   border-radius: 50%;
   background: var(--wr);
-  box-shadow: 0 0 0 2px var(--sf);
+  box-shadow: 0 0 0 2px var(--side);
 }
 .mdot.bd {
   background: var(--bd);
@@ -868,7 +902,7 @@ textarea.in {
   .sfoot {
     position: sticky;
     bottom: 0;
-    background: var(--sf);
+    background: var(--side);
     padding-bottom: 20px;
   }
 }
@@ -887,8 +921,9 @@ textarea.in {
     min-width: 0;
     min-height: 60px;
     padding: 8px 10px 8px 16px;
-    background: var(--sf);
-    border-bottom: 1px solid var(--ln);
+    background: var(--side);
+    color: var(--side-ink);
+    border-bottom: 1px solid var(--side-ln);
     position: sticky;
     top: 0;
     z-index: 30;

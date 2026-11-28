@@ -46,7 +46,15 @@ export interface AppShellProps {
   /** The application's name and what it is, beside its mark. */
   name: ReactNode;
   subtitle?: ReactNode;
-  icon: IconName;
+  /** The application's mark: an icon of the set, or the brand's own drawing in `mark`. */
+  icon?: IconName;
+  /** The brand's own mark, such as its logo as an SVG, drawn instead of the icon. */
+  mark?: ReactNode;
+  /**
+   * The brand whose tokens apply, for a stylesheet from `brands/` such as "homeledger": set as
+   * data-brand on the .app element. The rcooler look when omitted.
+   */
+  brand?: string;
   /** Accessible name of the navigation, such as "Розділи". */
   navLabel: string;
   /** Accessible name of the phone menu button and of the panel's close button; navLabel when omitted. */
@@ -111,13 +119,12 @@ export function AppShell(props: AppShellProps) {
   const current = items.find((item) => item.current);
   const counted = items.filter((item) => item.count !== undefined && item.count > 0);
   const menuLabel = props.menuLabel ?? props.navLabel;
+  const mark = props.mark ?? (props.icon ? <Icon name={props.icon} /> : null);
 
   return (
-    <div className={cx("app", theme === "light" && "light")}>
+    <div className={cx("app", theme === "light" && "light")} data-brand={props.brand}>
       <header className="topbar" inert={menuOpen}>
-        <span className="mark">
-          <Icon name={props.icon} />
-        </span>
+        <span className="mark">{mark}</span>
         <div className="grow ell bn">{current ? current.label : props.name}</div>
         <button
           ref={menuRef}
@@ -145,9 +152,7 @@ export function AppShell(props: AppShellProps) {
         aria-label={props.navLabel}
       >
         <div className="brand">
-          <span className="mark">
-            <Icon name={props.icon} />
-          </span>
+          <span className="mark">{mark}</span>
           <div className="grow">
             <div className="bn">{props.name}</div>
             {props.subtitle !== undefined && <div className="mu sm">{props.subtitle}</div>}

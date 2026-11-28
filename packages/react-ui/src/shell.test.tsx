@@ -115,6 +115,46 @@ describe("AppShell", () => {
   });
 });
 
+describe("AppShell brands", () => {
+  it("names its brand on the .app element only when one is given", () => {
+    render(<Shell />);
+    expect(document.querySelector(".app")?.hasAttribute("data-brand")).toBe(false);
+    cleanup();
+    render(
+      <AppShell
+        name="HomeLedger"
+        brand="homeledger"
+        navLabel="Розділи"
+        nav={nav}
+        themeLabel="Світла тема"
+      >
+        <p>page</p>
+      </AppShell>,
+    );
+    expect(document.querySelector(".app")?.getAttribute("data-brand")).toBe("homeledger");
+  });
+
+  it("draws the brand's own mark instead of an icon, in the sidebar and the top bar", () => {
+    render(
+      <AppShell
+        name="HomeLedger"
+        mark={<svg data-testid="logo" aria-hidden="true" />}
+        navLabel="Розділи"
+        nav={nav}
+        themeLabel="Світла тема"
+      >
+        <p>page</p>
+      </AppShell>,
+    );
+    const marks = document.querySelectorAll(".mark");
+    expect(marks).toHaveLength(2);
+    marks.forEach((mark) => {
+      expect(mark.querySelector("[data-testid=logo]")).not.toBeNull();
+      expect(mark.querySelector(".i")).toBeNull();
+    });
+  });
+});
+
 describe("AppShell at phone width", () => {
   const settle = () => act(() => new Promise((resolve) => setTimeout(resolve, 0)));
   const parts = () => {

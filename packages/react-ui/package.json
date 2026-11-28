@@ -13,7 +13,8 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
-    "./kit.css": "./dist/kit.css"
+    "./kit.css": "./dist/kit.css",
+    "./brands/*": "./dist/brands/*"
   },
   "files": [
     "dist"

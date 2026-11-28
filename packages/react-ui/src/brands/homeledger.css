@@ -1,0 +1,57 @@
+/* @rcooler/react-ui/brands/homeledger.css: HomeLedger's brand over kit.css. Deep teal and brass on
+   paper, Onest for text. Load it after kit.css and give the .app element data-brand="homeledger"
+   (AppShell's brand prop). Fonts are not bundled: the app loads Onest, and Unbounded for its
+   wordmark. Light follows the brand board; the dark tokens keep its teal and brass on a dark
+   ground. */
+.app[data-brand="homeledger"] {
+  --bg: #0f1716;
+  --sf: #172221;
+  --sf2: #1f2e2c;
+  --ln: #2d403e;
+  --tx: #e6eeeb;
+  --mu: #a9bfba;
+  --ac: #7cc8bc;
+  --ac-ink: #08201e;
+  --ac-bg: rgba(124, 200, 188, 0.14);
+  --ok: #8fd4a6;
+  --ok-bg: rgba(143, 212, 166, 0.14);
+  --wr: #f0c76e;
+  --wr-bg: rgba(240, 199, 110, 0.15);
+  --bd: #f3a898;
+  --bd-bg: rgba(243, 168, 152, 0.15);
+  --font: Onest, "Segoe UI", system-ui, sans-serif;
+  --font-display: Onest, "Segoe UI", system-ui, sans-serif;
+  --r-card: 12px;
+  --r-ctl: 10px;
+  /* Brass is kept for the one action that moves the month forward. */
+  --pri: #e1b054;
+  --pri-ink: #2a1c05;
+  --mark: transparent;
+  --mark-ink: #f4f6f3;
+  --side: #0b2726;
+  --side-ink: #f4f6f3;
+  --side-mu: #d6e2de;
+  --side-dim: #8fb0a9;
+  --side-ln: #22514f;
+  --side-hover: rgba(255, 255, 255, 0.06);
+  --side-on: #1c5f5c;
+  --side-on-ink: #ffffff;
+}
+.app.light[data-brand="homeledger"] {
+  --bg: #f4f6f3;
+  --sf: #ffffff;
+  --sf2: #eef1ee;
+  --ln: #dde3dd;
+  --tx: #17201f;
+  --mu: #5b6763;
+  --ac: #1c5f5c;
+  --ac-ink: #ffffff;
+  --ac-bg: #dcebe8;
+  --ok: #1f5e3a;
+  --ok-bg: #e3f1e8;
+  --wr: #7a4f0e;
+  --wr-bg: #fbeed6;
+  --bd: #8a2e1f;
+  --bd-bg: #f8e1dc;
+  --side: #12403f;
+}

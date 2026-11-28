@@ -89,6 +89,26 @@ the classes of `Modal` (`.dlg-bg`, `.dlg`), the toasts (`.toasts`, `.toast`) and
 `.sort`). Fonts are not bundled: Inter and Manrope are used when installed, the system font
 otherwise.
 
+### Brands
+
+An application with its own brand keeps the same components and markup and sets tokens. kit.css
+reads every brand-specific value from a custom property on `.app` whose default is the rcooler
+look: `--font` and `--font-display`, the corners `--r-card` and `--r-ctl`, the main button `--pri`
+and `--pri-ink`, the mark `--mark` and `--mark-ink`, and the sidebar and the phone top bar
+(`--side`, `--side-ink`, `--side-mu`, `--side-dim`, `--side-ln`, `--side-hover`, `--side-on`,
+`--side-on-ink`). A brand stylesheet sets them, and the theme tokens, on `.app[data-brand="…"]`
+and `.app.light[data-brand="…"]`; `AppShell`'s `brand` prop sets the attribute and `mark` draws the
+brand's own logo instead of an icon. web-kit ships `@rcooler/react-ui/brands/homeledger.css`:
+
+```tsx
+import "@rcooler/react-ui/kit.css";
+import "@rcooler/react-ui/brands/homeledger.css";
+
+<AppShell brand="homeledger" mark={<HomeLedgerMark />} name={<Wordmark />} ...>
+```
+
+The application loads the brand's fonts (HomeLedger: Onest, and Unbounded for its wordmark).
+
 ## Using the packages
 
 The packages are not on a registry yet. Until they are, an app links them from a checkout of this
