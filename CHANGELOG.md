@@ -5,6 +5,11 @@ change interfaces; such changes are listed here.
 
 ## Unreleased
 
+## 0.2.0 (2026-11-28)
+
+- No code changes since 0.1.1. This is the version to install; 0.1.0 and 0.1.1 are deprecated on
+  npm.
+
 ## 0.1.1 (2026-11-28)
 
 - `react-admin`: `FormTableRow` takes `disabled`, which disables every control of a group row at
